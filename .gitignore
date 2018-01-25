@@ -1,0 +1,9 @@
+# Data files
+*.nc
+*.nc4
+*.grb2
+*.Z
+
+# Log files
+*.log
+
