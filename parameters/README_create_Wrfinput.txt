@@ -8,7 +8,9 @@ Authors: NCAR WRF-Hydro team
 
 Date: December 2017
 
-Requirements: R, NCO, and the ncdf4 R package 
+Requirements: R, NCO, the ncdf4 R package, geogrid file 
+
+Output: wrfinput.nc
 
 Instructions (users need to complete the following prior to running the script): 
 
