@@ -20,9 +20,11 @@
 ;              parse time info from the filename and add it to the final netCDF file.
 ;           4) NLDAS A_PCP is hourly precipitation amount. No need for zero'ing it out
 ;              at the begining of the time period.
+;           5) By default the domain number for the output filename is set to 1.  This can be changed in the 
+;              user settings section of this script.
 ;
 ;
-; Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*.grb"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
+; Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
 ;
 ;           srcFileName = filename pattern of the souce NLDAS files.
 ;                         e.g., "NLDAS_FORA0125_H.2013091300.grb", "NLDAS_FORA0125_H.2013091[2-5]00.grb" , ...
@@ -43,6 +45,12 @@ begin
 ;----------------------------------------------------------------------
 ; User settings
 ;----------------------------------------------------------------------
+
+  ;---------------------------------------------------------------;
+  ; Set the domain number to agree with the geogrid file and      ;
+  ; the IGRID option in the hydro.namelist for WRF-Hydro          ;
+  ;---------------------------------------------------------------;
+  domain  = "DOMAIN1"
 
   ;---------------------------------------------------------------;
   ; Set input and output file directories.                        ;
@@ -124,7 +132,7 @@ begin
      ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile= outdir + date_str+".LDASIN_DOMAIN1"
+      ncfile= outdir + date_str+".LDASIN_"+domain+".nc"
       if ( isfilepresent( ncfile ) ) then
          system ("/bin/rm "+ncfile)
       end if
