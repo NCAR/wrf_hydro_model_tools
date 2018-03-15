@@ -1,34 +1,30 @@
 ;----------------------------------------------------------------------
-; NCAR Command Language Version 6.1.2
-;
-; ESMF_genWgts_NLDAS2WRFHYDRO_forcing.ncl
-;
-; Project :
+; 
+; Name    : NLDAS2WRFHydro_generate_weights.ncl
 ;
 ; Purpose :
-;           This is an NCL/ESMF file for generating src and dst SCRIP files
-;           and weight file for regridding from a rectilinear NLDAS grid to a WRF
-;           HYDRO model domain, which is also in curvilinear coordinates
+;           This is an NCL script that uses EMSF utililites to generate src and dst SCRIP files
+;           and a weight file for regridding from a rectilinear NLDAS forcing data grid to a
+;           WRF-Hydro model domain, a curvilinear grid specified in a geo_em.d0x.nc file. 
 ;
-;           1) the first rectilinear_to_SCRIP to convert original source rectilinear
-;              grid to a SCRIP convention file.
-;           2) the second curvilinear_to_SCRIP to convert destination lat/lon grid to a
-;              SCRIP convention file.
-;           3) ESMF_regrid_gen_weights to generate a weight file using a remapping
+;           Steps:
+;           1) Use rectilinear_to_SCRIP to create a SCRIP (convention) file from a file
+;              describing the source rectilinear grid.
+;           2) Use curvilinear_to_SCRIP to create a SCRIP (convention) file from a file
+;              describing the destination (WRF-Hydro) grid.
+;           3) Use ESMF_regrid_gen_weights to generate a weight file using a remapping
 ;              option specified in the command line.
 ;
-;           The rectilinear grid definition is assumed to be in srsGridName file.
-;           Needs 1D lat/long fields for rectilinear_to_SCRIP
-;
-;           Destination domain filename (dstGRIDName) is hardwired in the program.
 ; 
-; Usage    : ncl 'interp_opt="conserve"' 'srcGridName="NLDAS_FORA0125_H.2013091200.nc"' 'dstGridName="geo_em.d01.nc.4mile_1km.nc"' ESMF_genWgts_NLDAS2WRFHYDRO_forcing.ncl
+; Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="NLDAS_FORA0125_H.2013091200.nc"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_generate_weights.ncl
 ;
-;            interp_opt = conserve / bilinear / patch
-;            srcGridName = filename that contains source grid
+;            interp_opt = conserve / bilinear 
+;            srcGridName = name of file that contains source grid
+;            dstGridName = name of file that contains the destination (WRF-Hydro) grid
 ;
 ; Kyoko Ikeda 23 Dec. 2013
 ; Updated: Jul 9, 2014    D. Gochis
+; Updated: Mar 15, 2018   K. FitzGerald
 ;            
 ;----------------------------------------------------------------------
 ;
@@ -57,9 +53,9 @@ begin
 
   ;---------------------------------------------------------------;
   ; Set source and destination grid filenames.                    ;
-  ; Defind weight filename.                                       ;
+  ; Define weight filename.                                       ;
   ;---------------------------------------------------------------;
-    wgtFileName = "./NLDAS_to_WRFHYDRO_weight_"+interp_opt+".nc"
+    wgtFileName = "./NLDAS2WRFHydro_weight_"+interp_opt+".nc"
 
   if ( .not.isfilepresent( srcGridName ) ) then
      print( " ... source grid file not found : "+ srcGridName )
@@ -69,8 +65,6 @@ begin
   if ( .not.isfilepresent( dstGridName ) ) then
      print( " ... destination grid file not found : "+ dstGridName )
      exit
-  else
-     ; dstGridName = "geo_em.d01.nc.4mile_1km.nc"
   end if
 
   ;---------------------------------------------------------------;
@@ -107,9 +101,9 @@ begin
     Opt@PrintTimings   = True
     Opt@Title          = "NLDAS"
 
-    src_SCRIP_filename     = "src_NLDAS2WRFHYDRO_"+interp_opt+".nc"
+    src_SCRIP_filename     = "SCRIP_NLDAS_"+interp_opt+".nc"
     rectilinear_to_SCRIP( src_SCRIP_filename, src_lat, src_lon, Opt)
-;---Clean up
+
     delete(Opt)
 
 ;----------------------------------------------------------------------
@@ -133,10 +127,9 @@ begin
     Opt@PrintTimings   = True
     Opt@Title          = dstGridName
 
-    dst_SCRIP_filename     = "dst_NLDAS2WRFHYDRO_"+interp_opt+".nc"
+    dst_SCRIP_filename     = "SCRIP_WRFHydro_"+interp_opt+".nc"
     curvilinear_to_SCRIP( dst_SCRIP_filename, dst_lat, dst_lon,Opt)
 
-;---Clean up
     delete(Opt)
 
 ;----------------------------------------------------------------------
