@@ -2,8 +2,7 @@
 ; 
 ; Name    : NLDAS2WRFHydro_generate_weights.ncl
 ;
-; Purpose :
-;           This is an NCL script that uses EMSF utililites to generate src and dst SCRIP files
+; Purpose : This is an NCL script that uses EMSF utililites to generate src and dst SCRIP files
 ;           and a weight file for regridding from a rectilinear NLDAS forcing data grid to a
 ;           WRF-Hydro model domain, a curvilinear grid specified in a geo_em.d0x.nc file. 
 ;
