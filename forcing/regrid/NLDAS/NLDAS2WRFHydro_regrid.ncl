@@ -22,10 +22,10 @@
 ;              at the begining of the time period.
 ;
 ;
-; Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*.nc"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
+; Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*.grb"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
 ;
 ;           srcFileName = filename pattern of the souce NLDAS files.
-;                         e.g., "NLDAS_FORA0125_H.2013091300.nc", "NLDAS_FORA0125_H.2013091[2-5]00.nc" , ...
+;                         e.g., "NLDAS_FORA0125_H.2013091300.grb", "NLDAS_FORA0125_H.2013091[2-5]00.grb" , ...
 ;           dstGridName = name of file that contains the destination (WRF-Hydro) grid
 ; 
 ; Kyoko Ikeda 23 December 2013
@@ -74,7 +74,7 @@ begin
    DLWR_varname = "DLWRF_110_SFC"
 
 ;----------------------------------------------------------------------
-; read in source and destination grid netCDF files
+; read in source and destination files
 ;----------------------------------------------------------------------
 
   if ( .not.isfilepresent( dstGridName ) ) then
@@ -100,18 +100,12 @@ begin
 
   do ifil = 0,num_datfils-1,1   ; loop through datafiles one at a time
    
-      suffix = isStrSubset( datfils(ifil), ".nc" ) ; check if the input filename has .nc suffix
-      if (suffix) then
-         datfile = addfile( datfils(ifil), "r")
-      else
-      print( suffix)
-         datfile = addfile( datfils(ifil)+".nc", "r")
-      end if
+      datfile = addfile( datfils(ifil), "r")
 
       print( " ... Open input file : "+ datfils(ifil) )
    
      ;----------------------------------------------------------------------
-     ; Parse time from filename : NLDAS_FORA0125_H.2013091300.nc
+     ; Parse time from filename : NLDAS_FORA0125_H.YYYYMMDDHH.*
      ;----------------------------------------------------------------------
       strs = str_split( datfils(ifil), "." )
       date_str = strs(1)
@@ -130,7 +124,7 @@ begin
      ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile= outdir + date_str+".LDASIN_DOMAIN2.nc"
+      ncfile= outdir + date_str+".LDASIN_DOMAIN1"
       if ( isfilepresent( ncfile ) ) then
          system ("/bin/rm "+ncfile)
       end if
