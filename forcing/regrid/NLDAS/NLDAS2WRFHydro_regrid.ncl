@@ -12,8 +12,10 @@
 ;           1) This scripts assumes that the source files are provided at an hourly interval.
 ;              This is true for the current generation of NLDAS forcing data and is an assumption made
 ;              to compute the rainrate variable in output files.          
-;           2) ESMF regridding performed with "conserve" option for precipitation
-;              and SWE. All other variables use bilinear option for remapping. 
+;           2) This script is currently configured to use the bilinear interpolation option for all forcing 
+;              fields.  Should the user desire to use a different interpolation option, the name for the
+;              corresponding weight file should be added to user settings and the weight files for each 
+;              variable adjusted appropriately.
 ;           3) NLDAS source files do not contain a "time" data field. This program will
 ;              parse time info from the filename and add it to the final netCDF file.
 ;           4) NLDAS A_PCP is hourly precipitation amount. No need for zero'ing it out
@@ -43,22 +45,21 @@ begin
 ;----------------------------------------------------------------------
 
   ;---------------------------------------------------------------;
-  ; Set source and destination grid filenames.                    ;
+  ; Set input and output file directories.                        ;
   ;---------------------------------------------------------------;
   dirm    = "./input_files/"       ; directory where source forcing data resides
   outdir  = "./output_files/"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
 
   ;---------------------------------------------------------------;
-  ; Source model data tination grid filenames.                    ;
+  ; Set a variable to indicate the timestep of source data        ;
   ;---------------------------------------------------------------;
-  dt=3600.0   ;forcing data timestep in seconds...
+  dt=3600.0   ; time over which precipitation is accumulated in the source dataset in units of seconds (currently set for NLDAS2 forcing)
 
   ;---------------------------------------------------------------;
-  ; Source, destination , and weight filenames for generating     ;
-  ; ESMF_regridding weights                                       ;
+  ; Weight filenames for regridding                               ;
   ;---------------------------------------------------------------;
-  wgtFileName_conserve = "./NLDAS_to_WRFHYDRO_weight_conserve.nc"
-  wgtFileName_bilinear = "./NLDAS_to_WRFHYDRO_weight_bilinear.nc"
+  ;wgtFileName_conserve = "./NLDAS2WRFHydro_weight_conserve.nc"
+  wgtFileName_bilinear = "./NLDAS2WRFHydro_weight_bilinear.nc"
 
   ;---------------------------------------------------------------;
   ; Data field names from the source file to be regridded         ;
@@ -79,8 +80,6 @@ begin
   if ( .not.isfilepresent( dstGridName ) ) then
      print( " ... source grid file not found : "+ dstGridName )
      exit
-  else 
-;      dstGridName = "./geo_em.d01.nc.4mile_1km.nc"
   end if
 
 ;---  destination grid data
@@ -89,14 +88,14 @@ begin
   dlat2d=dstfile->XLAT_M(0,:,:)
   dims=dimsizes(dlat2d)
 
-  flag=0    ;WRF - flag for removing accum precip...
+  flag=0    ; flag for removing accum precip... (should be set to 0 for NLDAS2 forcing data)
 
 ;----------------------------------------------------------------------
 ; Open source data files to be regridded...
 ;----------------------------------------------------------------------
   system("mkdir "+outdir)
 
-  datfils = systemfunc ("ls "+dirm+srcfilename)    ;list of file names
+  datfils = systemfunc ("ls "+dirm+srcfilename)    ; list of file names
   num_datfils     = dimsizes(datfils)
 
   do ifil = 0,num_datfils-1,1   ; loop through datafiles one at a time
@@ -149,47 +148,39 @@ begin
      
         if (v.eq.1) then
            var = datfile->$T_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.2) then
            var = datfile->$Q_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.3) then
            var = datfile->$U_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.4) then
            var = datfile->$V_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.5) then
            var = datfile->$P_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.6) then
-          ;wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
-           var = datfile->$PCP_varname$ 
-           var = var / dt   ;       convert from mm to mm/s
+           var = datfile->$PCP_varname$
+           wgtFileName = wgtFileName_bilinear 
+           var = var / dt ; convert from mm to mm/s
            var@long_name = "RAINRATE"
            var@description = "RAINRATE"
            var@units       = "mm s^-1"
         end if
         if (v.eq.7) then
            var = datfile->$DSWR_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.8) then
            var = datfile->$DLWR_varname$
-;           wgtFileName = wgtFileName_bilinear
-           wgtFileName = wgtFileName_conserve
+           wgtFileName = wgtFileName_bilinear
         end if
      
        printVarSummary(var)
@@ -215,16 +206,12 @@ begin
        ;-----------------------------------------------------;
         exist = isfilepresent( wgtFileName )
         if ( .not.exist ) then
-           print( " ... no wgtFile. Run ESMF_genWgts_NLDAS2WRFHYDRO_forcing.ncl first."+" "+wgtFileName )
+           print( " ... no weight file. Run NLDAS2WRFHydro_generate_weights.ncl first to generate: "+" "+wgtFileName )
            exit
         end if
      
         var2d = var
         v4 = ESMF_regrid_with_weights( var2d , wgtFileName, opt)
-        ;va = ESMF_regrid_with_weights( var2d , wgtFileName, opt)
-
-       ; printVarSummary(va)
-       ; exit
      
        ;----------------------------------------------------------------------
        ; Export interpolated data to new forcing file...
