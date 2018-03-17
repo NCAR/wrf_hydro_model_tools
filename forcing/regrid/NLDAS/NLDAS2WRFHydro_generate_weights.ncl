@@ -15,7 +15,7 @@
 ;              option specified in the command line.
 ;
 ; 
-; Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="NLDAS_FORA0125_H.2013091200.nc"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_generate_weights.ncl
+; Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="NLDAS_FORA0125_H.A20170101.0000.002.grb"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_generate_weights.ncl
 ;
 ;            interp_opt = conserve / bilinear 
 ;            srcGridName = name of file that contains source grid
