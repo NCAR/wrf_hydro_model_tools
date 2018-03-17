@@ -103,7 +103,7 @@ begin
 ;----------------------------------------------------------------------
   system("mkdir "+outdir)
 
-  datfils = systemfunc ("ls "+dirm+srcfilename)    ; list of file names
+  datfils = systemfunc ("ls "+dirm+srcFileName)    ; list of file names
   num_datfils     = dimsizes(datfils)
 
   do ifil = 0,num_datfils-1,1   ; loop through datafiles one at a time
@@ -113,20 +113,22 @@ begin
       print( " ... Open input file : "+ datfils(ifil) )
    
      ;----------------------------------------------------------------------
-     ; Parse time from filename : NLDAS_FORA0125_H.YYYYMMDDHH.*
+     ; Parse time from filename : NLDAS_FORA0125_H.AYYYYMMDD.HH*
      ;----------------------------------------------------------------------
       strs = str_split( datfils(ifil), "." )
-      date_str = strs(1)
-      dtime_map = (/4,2,2,2/)
-      date_vec = str_split_by_length( date_str, dtime_map)
+      sub_str = strs(1) + strs(2)
+      dtime_map = (/1,4,2,2,2/)
+      date_vec = str_split_by_length( sub_str, dtime_map)
       print( date_vec )
 
-      Times_str = date_vec(0)+"-"+date_vec(1)+"-"+date_vec(2)+"_"+date_vec(3)+":00:00"
+      date_str = date_vec(1)+date_vec(2)+date_vec(3)+date_vec(4)
+  
+      Times_str = date_vec(1)+"-"+date_vec(2)+"-"+date_vec(3)+"_"+date_vec(4)+":00:00"
       new_string = str_strip(Times_str)
       Times = stringtochar( new_string )
       Times!0 = "DateStrLen"
 
-      valid_time = cd_inv_calendar(toint(date_vec(0)), toint(date_vec(1)), toint(date_vec(2)), toint(date_vec(3)), toint(0) ,toint(0) ,"seconds since 1970-01-01 00:00:00", 0)
+      valid_time = cd_inv_calendar(toint(date_vec(1)), toint(date_vec(2)), toint(date_vec(3)), toint(date_vec(4)), toint(0) ,toint(0) ,"seconds since 1970-01-01 00:00:00", 0)
       valid_time!0 = "Time"
 
      ;----------------------------------------------------------------------
