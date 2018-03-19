@@ -85,19 +85,12 @@ begin
        exit
     end if
 
-    if ( isfilevar( src_file, "GaugeCorrQPE01H_P0_L102_GLL0" ) ) then
-       test_mask = src_file->GaugeCorrQPE01H_P0_L102_GLL0
-    else
-       print( " ... no such data field " )
-       exit
-    end if
-
     Opt                = True
-    Opt@Mask2D         = where(.not.ismissing(test_mask),1,0)
-    Opt@SrcRegional    = True
     Opt@ForceOverwrite = True
     Opt@PrintTimings   = True
     Opt@Title          = "MRMS"
+    Opt@CopyVarAtts    = True
+    Opt@CopyVarCoords  = False
 
     src_SCRIP_filename     = "SCRIP_MRMS_"+interp_opt+".nc"
     rectilinear_to_SCRIP( src_SCRIP_filename, src_lat, src_lon, Opt)
@@ -136,10 +129,12 @@ begin
 ;----------------------------------------------------------------------
     Opt                      = True
     Opt@InterpMethod         = interp_opt
+    Opt@SrcRegional          = True
     Opt@DstRegional          = True
     Opt@ForceOverwrite       = True
     Opt@PrintTimings         = True
     Opt@Debug                = True
+    Opt@LargeFile            = True
 
     ESMF_regrid_gen_weights( src_SCRIP_filename, dst_SCRIP_filename, wgtFileName, Opt)
 
