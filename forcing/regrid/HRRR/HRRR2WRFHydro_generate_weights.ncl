@@ -7,8 +7,8 @@
 ;           WRF-Hydro model domain, a curvilinear grid specified in a geo_em.d0x.nc file. 
 ;
 ;           Steps:
-;           1) Use rectilinear_to_SCRIP to create a SCRIP (convention) file from a file
-;              describing the source rectilinear grid.
+;           1) Use curvilinear_to_SCRIP to create a SCRIP (convention) file from a file
+;              describing the source curvilinear grid.
 ;           2) Use curvilinear_to_SCRIP to create a SCRIP (convention) file from a file
 ;              describing the destination (WRF-Hydro) grid.
 ;           3) Use ESMF_regrid_gen_weights to generate a weight file using a remapping
@@ -85,19 +85,13 @@ begin
        exit
     end if
 
-    if ( isfilevar( src_file, "TMP_P0_L103_GLC0" ) ) then
-       test_mask = src_file->TMP_P0_L103_GLC0
-    else
-       print( " ... no such data field " )
-       exit
-    end if
-
     Opt                = True
-    Opt@Mask2D         = where(.not.ismissing(test_mask),1,0)
     Opt@SrcRegional    = True
     Opt@ForceOverwrite = True
     Opt@PrintTimings   = True
     Opt@Title          = "HRRR"
+    Opt@CopyVarAtts    = True
+    Opt@CopyVarCoords  = False
 
     src_SCRIP_filename     = "SCRIP_HRRR_"+interp_opt+".nc"
     curvilinear_to_SCRIP( src_SCRIP_filename, src_lat, src_lon, Opt)
@@ -123,6 +117,7 @@ begin
     Opt@DstRegional    = True
     Opt@ForceOverwrite = True
     Opt@PrintTimings   = True
+    Opt@LargeFile      = True
     Opt@Title          = dstGridName
 
     dst_SCRIP_filename     = "SCRIP_WRFHydro_"+interp_opt+".nc"
@@ -136,10 +131,12 @@ begin
 ;----------------------------------------------------------------------
     Opt                      = True
     Opt@InterpMethod         = interp_opt
+    Opt@SrcRegional          = True
     Opt@DstRegional          = True
     Opt@ForceOverwrite       = True
     Opt@PrintTimings         = True
     Opt@Debug                = True
+    Opt@LargeFile            = True
 
     ESMF_regrid_gen_weights( src_SCRIP_filename, dst_SCRIP_filename, wgtFileName, Opt)
 
