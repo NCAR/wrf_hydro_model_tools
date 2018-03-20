@@ -57,7 +57,8 @@ The MRMS data fields used by WRF-Hydro / the regridding scripts are:
 "lon_0"   - longitude
 "GaugeCorrQPE01H_P0_L102_GLL0" - accumulated precipitation
 
-Additional specific usage information for these scripts is provided in the header of the script codes.
+Additional specific usage information for these scripts is provided in the 
+header of the script codes.
 
 ################################################################################
 Running 'MRMS2WRFHydro_generate_weights.ncl':
@@ -82,8 +83,10 @@ Running 'MRMS2WRFHydro_regrid.ncl':
 Usage   : ncl 'srcFileName="MRMS_GaugeCorr_QPE_01H_00.*"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_regrid.ncl
 
           srcFileName = filename pattern of the souce MRMS files.
-                        e.g., "MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2", "MRMS_GaugeCorr_QPE_01H_00.*.grib2" , ...
-          dstGridName = name of file that contains the destination (WRF-Hydro) grid
+                        e.g., "MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2",
+                        "MRMS_GaugeCorr_QPE_01H_00.*.grib2" , ...
+          dstGridName = name of file that contains the destination (WRF-Hydro) 
+                        grid
 
 NOTES on the use of MRMS2WRFHydro_regrid.ncl:
 1. This script will use the regridding weight files created by the
