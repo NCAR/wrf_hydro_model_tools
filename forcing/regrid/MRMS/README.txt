@@ -82,7 +82,7 @@ Running 'MRMS2WRFHydro_regrid.ncl':
 Usage   : ncl 'srcFileName="MRMS_GaugeCorr_QPE_01H_00.*"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_regrid.ncl
 
           srcFileName = filename pattern of the souce MRMS files.
-                        e.g., "NLDAS_FORA0125_H.2013091300.grb", "NLDAS_FORA0125_H.2013091[2-5]00.grb" , ...
+                        e.g., "MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2", "MRMS_GaugeCorr_QPE_01H_00.*.grib2" , ...
           dstGridName = name of file that contains the destination (WRF-Hydro) grid
 
 NOTES on the use of MRMS2WRFHydro_regrid.ncl:
