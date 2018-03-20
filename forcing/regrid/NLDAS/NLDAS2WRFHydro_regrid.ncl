@@ -1,7 +1,7 @@
 ;----------------------------------------------------------------------
 ; Name    : NLDAS2WRFHydro_regrid.ncl
 ;
-; Purpose : This is an NCL script that uses ESMF utilities to perform regridding of various NLDAS 
+; Purpose : This is an NCL script that uses ESMF utilities to perform regridding of various 
 ;           data fields to a WRF-Hydro domain.
 ;
 ;           Note that before running this script you will need to run the 
@@ -9,7 +9,7 @@
 ;           file(s) for your chosen regridding option(s). 
 ;
 ;           Important notes:
-;           1) This scripts assumes that the source files are provided at an hourly interval.
+;           1) This script assumes that the source files are provided at an hourly interval.
 ;              This is true for the current generation of NLDAS forcing data and is an assumption made
 ;              to compute the rainrate variable in output files.          
 ;           2) This script is currently configured to use the bilinear interpolation option for all forcing 
