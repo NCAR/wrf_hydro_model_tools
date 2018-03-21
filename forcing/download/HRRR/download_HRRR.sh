@@ -13,5 +13,5 @@ fi
 
 date_str=$1
 
-wget -r -np -nd -A "hrrr.t14z.wrfsubhf??.grib2" http://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/hrrr.${date_str}/
+wget -r -np -nd -A "hrrr.t14z.wrfsfcf??.grib2" http://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/hrrr.${date_str}/
 
