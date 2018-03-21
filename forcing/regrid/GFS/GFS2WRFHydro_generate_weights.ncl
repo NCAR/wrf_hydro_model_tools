@@ -74,7 +74,7 @@ begin
 ;----------------------------------------------------------------------
 ; Convert source grid to a SCRIP convention file.
 ;----------------------------------------------------------------------
-    src_file = addfile(srcGridName + ".grb","r")
+    src_file = addfile(srcGridName + ".grb" ,"r")
     vNames   = getfilevarnames( src_file )
 
     if ( isfilevar( src_file, LatName ) .and. isfilevar( src_file, LonName ) ) then

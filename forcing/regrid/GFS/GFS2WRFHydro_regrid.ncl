@@ -61,9 +61,9 @@ begin
    U_varname = "UGRD_P0_L103_GLL0"
    V_varname = "VGRD_P0_L103_GLL0"
    Q_varname = "SPFH_P0_L103_GLL0"
-   PCP_varname  = "PRATE_P8_L1_GLL0_avg"
-   DSWR_varname = "DSWRF_P8_L1_GLL0_avg"
-   DLWR_varname = "DLWRF_P8_L1_GLL0_avg"
+   PCP_varname  = "PRATE_P8_L1_GLL0_avg" ; or similar 
+   DSWR_varname = "DSWRF_P8_L1_GLL0_avg" ; or similar
+   DLWR_varname = "DLWRF_P8_L1_GLL0_avg" ; or similar
 
 ;----------------------------------------------------------------------
 ; read in source and destination files
@@ -80,7 +80,7 @@ begin
   dlat2d=dstfile->XLAT_M(0,:,:)
   dims=dimsizes(dlat2d)
 
-  flag=0    ; flag for removing accum precip... (should be set to 0 for NLDAS2 forcing data)
+  flag=0    ; flag for removing accum precip... 
 
 ;----------------------------------------------------------------------
 ; Open source data files to be regridded...
@@ -95,11 +95,14 @@ begin
       datfile = addfile( datfils(ifil) + ".grb", "r")
 
       print( " ... Open input file : "+ datfils(ifil) )
+
+      vnames = getfilevarnames(datfile)
    
      ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile= outdir + datfils(ifil) + "_regrid.nc"
+      ncfile = str_sub_str(datfils(ifil), dirm, outdir)
+      ncfile = ncfile + "_regrid.nc"
       if ( isfilepresent( ncfile ) ) then
          system ("/bin/rm "+ncfile)
       end if
@@ -113,19 +116,19 @@ begin
      do v=1,8
      
         if (v.eq.1) then
-           var = datfile->$T_varname$
+           var = datfile->$T_varname$(0,:,:)
            wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.2) then
-           var = datfile->$Q_varname$
+           var = datfile->$Q_varname$(0,:,:)
            wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.3) then
-           var = datfile->$U_varname$
+           var = datfile->$U_varname$(0,:,:)
            wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.4) then
-           var = datfile->$V_varname$
+           var = datfile->$V_varname$(0,:,:)
            wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.5) then
@@ -133,18 +136,21 @@ begin
            wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.6) then
-           var = datfile->$PCP_varname$
+           PCP_fullvarname = str_match(vnames, PCP_varname)
+           var = datfile->$PCP_fullvarname$
            wgtFileName = wgtFileName_bilinear 
            var@long_name = "RAINRATE"
            var@description = "RAINRATE"
            var@units       = "mm s^-1"
         end if
         if (v.eq.7) then
-           var = datfile->$DSWR_varname$
+           DSWR_fullvarname = str_match(vnames, DSWR_varname)
+           var = datfile->$DSWR_fullvarname$
            wgtFileName = wgtFileName_bilinear
         end if
         if (v.eq.8) then
-           var = datfile->$DLWR_varname$
+           DLWR_fullvarname = str_match(vnames, DLWR_varname)
+           var = datfile->$DLWR_fullvarname$
            wgtFileName = wgtFileName_bilinear
         end if
      

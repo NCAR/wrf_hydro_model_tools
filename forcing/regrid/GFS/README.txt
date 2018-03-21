@@ -63,9 +63,9 @@ The GFS data fields used by WRF-Hydro / the regridding scripts are:
 "UGRD_P0_L103_GLL0" - wind speed - u direction
 "VGRD_P0_L103_GLL0" - wind speed - v direction
 "SPFH_P0_L103_GLL0" - specific humidity 
-"PRATE_P8_L1_GLL0_avg" - precipitation rate
-"DSWRF_P8_L1_GLL0_avg" - incoming shortwave radiation
-"DLWRF_P8_L1_GLL0_avg" - incoming longwave radiation
+"PRATE_P8_L1_GLL0_avg*" - precipitation rate
+"DSWRF_P8_L1_GLL0_avg*" - incoming shortwave radiation
+"DLWRF_P8_L1_GLL0_avg*" - incoming longwave radiation
 
 Additional specific usage information for these scripts is provided in the
 header of the script codes.
@@ -74,10 +74,10 @@ header of the script codes.
 Running 'GFS2WRFHydro_generate_weights.ncl':
 ################################################################################
 
-Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/gfs.t00z.pgrb2.0p25.f001.grb"' 'dstGridName="geo_em.d01.nc"' GFS2WRFHydro_generate_weights.ncl
+Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/gfs.t00z.pgrb2.0p25.f001"' 'dstGridName="geo_em.d01.nc"' GFS2WRFHydro_generate_weights.ncl
 
            interp_opt = conserve / bilinear 
-           srcGridName = name of file that contains source grid with ".grb" 
+           srcGridName = name of file that contains source grid
                          appended to the end so that NCL recognizes the format
            dstGridName = name of file that contains the destination (WRF-Hydro)
                          grid
@@ -85,10 +85,6 @@ Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/gfs.t00z.pgrb2.
 NOTES on the use of 'GFS2WRFHydro_generate_weights.ncl':
 1. This script may take a while to run. 
 2. Note that runtime increases with larger domain sizes and higher resolution.
-3. You do not need to change the name of the source data files, but do need to
-   add ".grb" to the end of the srcGridName argument so that NCL recognizes the
-   format of the input file.  
-
 
 ################################################################################
 Running 'GFS2WRFHydro_regrid.ncl':
