@@ -24,7 +24,7 @@
 ;              user settings section of this script.
 ;
 ;
-; Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
+; Example Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
 ;
 ;           srcFileName = filename pattern of the souce NLDAS files.
 ;                         e.g., "NLDAS_FORA0125_H.2013091300.grb", "NLDAS_FORA0125_H.2013091[2-5]00.grb" , ...
@@ -146,7 +146,7 @@ begin
       ncdf->valid_time = valid_time
    
      ;----------------------------------------------------------------------
-     ;  Processing...no further mods should be required...
+     ;  Processing...no further modifications should be required...
      ;----------------------------------------------------------------------
      do v=1,8
      
