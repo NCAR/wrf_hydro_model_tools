@@ -77,8 +77,7 @@ Running 'HRRR2WRFHydro_generate_weights.ncl':
 Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/hrrr.t14z.wrfsfcf00.grib2"' 'dstGridName="geo_em.d01.nc"' HRRR2WRFHydro_generate_weights.ncl
 
            interp_opt = conserve / bilinear 
-           srcGridName = name of file that contains source grid with ".grb" 
-                         appended to the end so that NCL recognizes the format
+           srcGridName = name of file that contains source grid 
            dstGridName = name of file that contains the destination (WRF-Hydro)
                          grid
 
