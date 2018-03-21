@@ -136,8 +136,7 @@ begin
       var = datfile->$PCP_varname$
       wgtFileName = wgtFileName_bilinear 
       var = var / dt ; convert from mm to mm/s
-      var@long_name = "RAINRATE"
-      var@description = "RAINRATE"
+      var@long_name = "precipitation rate"
       var@units       = "mm s^-1"
      
       printVarSummary(var)
@@ -145,7 +144,7 @@ begin
      ;----------------------------------------------------------------------
      ; Define new array and perform regriddding
      ;----------------------------------------------------------------------
-      ntimes = 1  ; for NLDAS, there is only one time step in each file
+      ntimes = 1  ; for MRMS, there is only one time step in each file
       v4 = new((/ntimes(0), dims(0), dims(1)/),"double")
        
       printVarSummary(v4)
@@ -181,7 +180,7 @@ begin
       v4!2 = "west_east"
       printVarSummary(v4)
        
-      ncdf->RAINRATE = v4
+      ncdf->precip_rate = v4
 
       delete([/var,v4,var2d,wgtFileName/])
      
