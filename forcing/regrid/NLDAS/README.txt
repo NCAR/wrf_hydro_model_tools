@@ -76,7 +76,7 @@ header of the script codes.
 Running 'NLDAS2WRFHydro_generate_weights.ncl':
 ################################################################################
 
-Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/NLDAS_FORA0125_H.A20170101.0000.002.grb"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_generate_weights.ncl
+Example Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/NLDAS_FORA0125_H.A20170101.0000.002.grb"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_generate_weights.ncl
 
            interp_opt = conserve / bilinear 
            srcGridName = name of file that contains source grid
@@ -92,7 +92,7 @@ NOTES on the use of 'NLDAS2WRFHydro_generate_weights.ncl':
 Running 'NLDAS2WRFHydro_regrid.ncl':
 ################################################################################
 
-Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
+Example Usage   : ncl 'srcFileName="NLDAS_FORA0125_H.*"' 'dstGridName="geo_em.d01.nc"' NLDAS2WRFHydro_regrid.ncl
 
           srcFileName = filename pattern of the souce NLDAS files.
                         e.g., "NLDAS_FORA0125_H.2013091300.grb",
