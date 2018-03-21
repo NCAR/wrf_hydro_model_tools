@@ -19,7 +19,7 @@
 ;              input filename convention to the user.  
 ;
 ;
-; Usage   : ncl 'srcFileName="gfs.*.pgrb2.0p25.*"' 'dstGridName="geo_em.d01.nc"' GFS2WRFHydro_regrid.ncl
+; Example Usage   : ncl 'srcFileName="gfs.*.pgrb2.0p25.*"' 'dstGridName="geo_em.d01.nc"' GFS2WRFHydro_regrid.ncl
 ;
 ;           srcFileName = filename pattern of the souce GFS files.
 ;                         e.g., "gfs.t00z.pgrb2.0p25.f001", "gfs.*.pgrb2.0p25.*" , ...
@@ -111,7 +111,7 @@ begin
       ncdf->lon = dlon2d   ;output lon
    
      ;----------------------------------------------------------------------
-     ;  Processing...no further mods should be required...
+     ;  Processing...no further modifications should be required...
      ;----------------------------------------------------------------------
      do v=1,8
      
