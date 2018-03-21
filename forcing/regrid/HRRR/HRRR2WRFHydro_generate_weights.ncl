@@ -15,7 +15,7 @@
 ;              option specified in the command line.
 ;
 ; 
-; Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/hrrr.t14z.wrfsfcf01.grib2"' 'dstGridName="geo_em.d01.nc"' HRRR2WRFHydro_generate_weights.ncl
+; Example Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/hrrr.t14z.wrfsfcf01.grib2"' 'dstGridName="geo_em.d01.nc"' HRRR2WRFHydro_generate_weights.ncl
 ;
 ;            interp_opt = conserve / bilinear 
 ;            srcGridName = name of file that contains source grid

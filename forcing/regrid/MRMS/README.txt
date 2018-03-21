@@ -63,31 +63,21 @@ header of the script codes.
 ################################################################################
 Running 'MRMS2WRFHydro_generate_weights.ncl':
 ################################################################################
+NOTES on the use of 'MRMS2WRFHydro_generate_weights.ncl':
+1. This script may take a while to run. 
+2. Note that runtime increases with larger domain sizes and higher resolution. 
 
-Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_generate_weights.ncl
+Example Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_generate_weights.ncl
 
            interp_opt = conserve / bilinear 
            srcGridName = name of file that contains source grid
            dstGridName = name of file that contains the destination (WRF-Hydro)
                          grid
 
-NOTES on the use of 'MRMS2WRFHydro_generate_weights.ncl':
-1. This script may take a while to run. 
-2. Note that runtime increases with larger domain sizes and higher resolution. 
-
 
 ################################################################################
 Running 'MRMS2WRFHydro_regrid.ncl':
 ################################################################################
-
-Usage   : ncl 'srcFileName="MRMS_GaugeCorr_QPE_01H_00.*"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_regrid.ncl
-
-          srcFileName = filename pattern of the souce MRMS files.
-                        e.g., "MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2",
-                        "MRMS_GaugeCorr_QPE_01H_00.*.grib2" , ...
-          dstGridName = name of file that contains the destination (WRF-Hydro) 
-                        grid
-
 NOTES on the use of MRMS2WRFHydro_regrid.ncl:
 1. This script will use the regridding weight files created by the
    'MRMS2WRFHydro_generate_weights.ncl' script. Therefore, do not change the
@@ -97,4 +87,14 @@ NOTES on the use of MRMS2WRFHydro_regrid.ncl:
 3. The output data created from this script will be placed in a local directory
    called 'output_files/'. If this directory is not present the script will
    create it.
+
+Example Usage   : ncl 'srcFileName="MRMS_GaugeCorr_QPE_01H_00.*"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_regrid.ncl
+
+          srcFileName = filename pattern of the souce MRMS files.
+                        e.g., "MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2",
+                        "MRMS_GaugeCorr_QPE_01H_00.*.grib2" , ...
+          dstGridName = name of file that contains the destination (WRF-Hydro) 
+                        grid
+
+
 

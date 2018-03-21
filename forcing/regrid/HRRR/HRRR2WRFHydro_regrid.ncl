@@ -19,7 +19,7 @@
 ;              input filename convention to the user.  
 ;
 ;
-; Usage   : ncl 'srcFileName="hrrr.*.grib2"' 'dstGridName="geo_em.d01.nc"' HRRR2WRFHydro_regrid.ncl
+;  Example Usage   : ncl 'srcFileName="hrrr.*.grib2"' 'dstGridName="geo_em.d01.nc"' HRRR2WRFHydro_regrid.ncl
 ;
 ;           srcFileName = filename pattern of the souce HRRR files.
 ;                         e.g., "hrrr.t14z.wrfsfcf01.grib2", "hrrr.*.grib2" , ...
@@ -109,7 +109,7 @@ begin
       ncdf->lon = dlon2d   ;output lon
    
      ;----------------------------------------------------------------------
-     ;  Processing...no further mods should be required...
+     ;  Processing...no further modifications should be required...
      ;----------------------------------------------------------------------
      do v=1,8
      

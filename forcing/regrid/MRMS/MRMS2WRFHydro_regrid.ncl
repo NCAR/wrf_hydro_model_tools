@@ -22,7 +22,7 @@
 ;              at the begining of the time period.
 ;
 ;
-; Usage   : ncl 'srcFileName="MRMS_GaugeCorr_QPE_01H_00.*.grib2"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_regrid.ncl
+; Example Usage   : ncl 'srcFileName="MRMS_GaugeCorr_QPE_01H_00.*.grib2"' 'dstGridName="geo_em.d01.nc"' MRMS2WRFHydro_regrid.ncl
 ;
 ;           srcFileName = filename pattern of the souce MRMS files.
 ;                         e.g., "MRMS_GaugeCorr_QPE_01H_00.00_20180318-110000.grib2", "MRMS_GaugeCorr_QPE_01H_00.*.grib2" , ...
@@ -131,7 +131,7 @@ begin
       ncdf->valid_time = valid_time
    
      ;----------------------------------------------------------------------
-     ;  Processing...no further mods should be required...
+     ;  Processing...no further modifications should be required...
      ;----------------------------------------------------------------------
       var = datfile->$PCP_varname$
       wgtFileName = wgtFileName_bilinear 
