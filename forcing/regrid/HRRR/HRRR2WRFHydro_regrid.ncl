@@ -100,7 +100,7 @@ begin
      ; Open output file
      ;----------------------------------------------------------------------
       ncfile = str_sub_str( datfils(ifil), dirm, outdir )   
-      ncfile = ncfile + "_regrid.nc"
+      ncfile = str_sub_str( ncfile, ".grib2", "_regrid.nc")
       if ( isfilepresent( ncfile ) ) then
          system ("/bin/rm "+ncfile)
       end if
