@@ -13,7 +13,7 @@
 geoFile <- 'geo_em.d01.nc'
 
 #### Output wrfinput file:
-wrfinFile <- 'wrfinput_d01'
+wrfinFile <- 'wrfinput_d01.nc'
 
 #### Soil type to use as a fill value in case conflicts between soil water and land cover water cells:
 # If the script encounters a cell that is classified as land in the land use field (LU_INDEX)
