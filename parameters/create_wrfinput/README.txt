@@ -5,7 +5,7 @@ Purpose: create_Wrfinput.R is an R script developed for the purpose of creating 
 
 Authors: NCAR WRF-Hydro team
 
-Date: May 2018
+Date: June 2018
 
 Requirements: R, NCO, the ncdf4 R package
 
@@ -15,13 +15,9 @@ Input files:
 Output files:
    wrfinput_d01.nc (default filename) - wrfinput file to initialize the land surface model
 
-Instructions (users need to complete the following prior to running the script): 
+Usage: ./create_Wrfinput.R --geogrid='geo_em.d01.nc' --filltyp=3 --laimo=8 
 
-1. Update script to point to input geogrid file
-2. Update script to specify the desired name of the output wrfinput file
-3. Update script to specify the desired soil category value to be used in case of conflicts between
-   soil water and land cover water cells
-4. Update script to specify the desired month to use for leaf area index (LAI) initialization
-   (needed for some NoahMP configurations)
-
-Usage: Rscript create_Wrfinput.R
+Important notes:
+   * Both filltyp and laimo arguments do have default values however we recommend that users update these 
+     to values more appropriate for their domain / simulation.
+   * For information and descriptions of these and other optional arguments run the script with no arguments.
