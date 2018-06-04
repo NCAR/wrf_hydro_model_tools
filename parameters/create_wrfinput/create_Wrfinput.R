@@ -6,14 +6,45 @@
 #          https://github.com/NCAR/hrldas-release/blob/release/HRLDAS/HRLDAS_forcing/lib/module_geo_em.F
 #          from M. Barlage.
 ############################################################
+#!/usr/bin/env Rscript
+library(optparse)
+library(ncdf4)
 
-# Update relevant arguments below.
+option_list = list(
+  make_option(c("--geogrid"), type="character", default=NULL, 
+              help="Path to input geogrid file", metavar="character"),
+  make_option(c("--outfile"), type="character", default="wrfinput_d01.nc", 
+              help="output file name [default= %default]", metavar="character"),
+  make_option(c("--filltyp"), type="integer", default=3, help="Soil type to use as a fill value in case conflicts between soil water and land cover water cells.
+If the script encounters a cell that is classified as land in the land use field (LU_INDEX) but is classified as a water soil type, it will replace the soil type with the value you
+              specify below. Ideally there are not very many of these, so you can simply choose the most
+              common soil type in your domain. Alternatively, you can set to a bad value (e.g., -8888)
+              to see how many of these conflicts there are. If you do this DO NOT RUN THE MODEL WITH THESE
+              BAD VALUES. Instead, fix them manually with a neighbor fill or similar fill algorithm.", 
+              metavar="character"),
+  make_option(c("--laimo"), type="integer", default=8, 
+              help="output file name [default= %default]", metavar="character"),
+  make_option(c("--missfloat"), type="numeric", default=(-1.e+36), 
+              help="Missing values to use when defining netcdf file for floats [default= %default]", 
+              metavar="character"),
+  make_option(c("--missint"), type="integer", default=(-9999), 
+              help="Missing values to use when defining netcdf file for integers [default= %default]", 
+              metavar="character")
+); 
+
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+if (is.null(opt$geogrid)){
+  print_help(opt_parser)
+  stop("At least one argument must be supplied (input file).n", call.=FALSE)
+}
 
 #### Input geogrid:
-geoFile <- 'geo_em.d01.nc'
+geoFile <- opt$geogrid
 
 #### Output wrfinput file:
-wrfinFile <- 'wrfinput_d01.nc'
+wrfinFile <- opt$outfile
 
 #### Soil type to use as a fill value in case conflicts between soil water and land cover water cells:
 # If the script encounters a cell that is classified as land in the land use field (LU_INDEX)
@@ -22,22 +53,20 @@ wrfinFile <- 'wrfinput_d01.nc'
 # common soil type in your domain. Alternatively, you can set to a "bad" value (e.g., -8888) 
 # to see how many of these conflicts there are. If you do this DO NOT RUN THE MODEL WITH THESE 
 # BAD VALUES. Instead, fix them manually with a neighbor fill or similar fill algorithm.
-fillsoiltyp <- 3
+fillsoiltyp <- opt$filltyp
 
 #### Month to use for LAI initialization:
 # This may or may not be used depending on your NoahMP options.
-laimo <- 8
+laimo <- opt$laimo
 
 #### Missing values to use when defining netcdf file:
-missFloat <- (-1.e+36)
-missInt <- (-9999)
+missFloat <- opt$missfloat
+missInt <- opt$missint
 
 
 #######################################################
 # Do not update below here.
 #######################################################
-
-library(ncdf4)
 
 # Create initial file
 cmd <- paste0("ncks -O -4 -v XLAT_M,XLONG_M,HGT_M,SOILTEMP,LU_INDEX,MAPFAC_MX,MAPFAC_MY,GREENFRAC,LAI12M,SOILCTOP ", geoFile, " ", wrfinFile)
