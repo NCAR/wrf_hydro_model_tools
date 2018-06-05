@@ -1,7 +1,7 @@
 README_create_WRFinput.txt
 
 Purpose: create_Wrfinput.R is an R script developed for the purpose of creating wrfinput files for
-         the WRF-Hydro model. This allows users to avoid running the WRF program real.exe.  
+         the WRF-Hydro model. The script produces fields of spatially uniform initial model states of soil moisture, soil temperature, soil liquid water content and skin temperature among a few other variables necessary for model cold-start initialization. This script allows users to avoid running the WRF program real.exe.  
 
 Authors: NCAR WRF-Hydro team
 
