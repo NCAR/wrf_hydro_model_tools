@@ -145,6 +145,8 @@ begin
       ncdf->Times = Times  ;output times
       ncdf->valid_time = valid_time
    
+      delete([/Times,valid_time/])
+      
      ;----------------------------------------------------------------------
      ;  Processing...no further modifications should be required...
      ;----------------------------------------------------------------------
