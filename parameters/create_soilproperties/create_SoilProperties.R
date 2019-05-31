@@ -54,12 +54,12 @@ library(ncdf4)
 nameLookupSoil <- list(smcref="REFSMC", dwsat="SATDW", smcdry="DRYSMC", smcwlt="WLTSMC",
                    bexp="BB", dksat="SATDK", psisat="SATPSI", quartz="QTZ",
                    refdk="REFDK", refkdt="REFKDT", slope="SLOPE", smcmax="MAXSMC",
-                   cwpvt="CWPVT", vcmx25="VCMX25", mp="MP", hvt="HVT", mfsno="MFSNO")
+                   cwpvt="CWPVT", vcmx25="VCMX25", mp="MP", hvt="HVT", mfsno="MFSNO",
+                   rsurfexp="RSURF_EXP")
 var3d <- c("smcref", "dwsat", "smcdry", "smcwlt", "bexp", "dksat", "psisat", "quartz", "smcmax")
 # Hydro 2D Table
 nameLookupHyd <- list(SMCMAX1="smcmax", SMCREF1="smcref", SMCWLT1="smcwlt", 
                    OV_ROUGH2D="OV_ROUGH2D", LKSAT="dksat")
-hydTagList <- list(TOP1=c(1), TOP2=c(1,2), ALL=c(1,2,3,4)) 
 
 
 #### Create new soil properties file with fill values
@@ -89,24 +89,21 @@ system(cmd, intern=FALSE)
 
 #### Create new hydro2d file with fill values
 
-for (tag in names(hydTagList)) {
-   hyd2dFileTag <- paste0(hyd2dFile, ".", tag)
-   cmd <- paste0("ncks -O -4 -v HGT_M ", geoFile, " ", hyd2dFileTag)
-   print(cmd)
-   system(cmd, intern=FALSE)
-   ncid <- nc_open(hyd2dFileTag, write=TRUE)
-   sndim <- ncid$dim[['south_north']]
-   wedim <- ncid$dim[['west_east']]
-   for (i in names(nameLookupHyd)) {
-      message(i)
-      vardef <- ncvar_def(i, "", list(wedim, sndim), -9999.0)
-      ncid <- ncvar_add(ncid, vardef)
-   }
-   nc_close(ncid)
-   cmd <- paste0("ncks -O -x -v HGT_M ", hyd2dFileTag, " ", hyd2dFileTag)
-   print(cmd)
-   system(cmd, intern=FALSE)
+cmd <- paste0("ncks -O -4 -v HGT_M ", geoFile, " ", hyd2dFile)
+print(cmd)
+system(cmd, intern=FALSE)
+ncid <- nc_open(hyd2dFile, write=TRUE)
+sndim <- ncid$dim[['south_north']]
+wedim <- ncid$dim[['west_east']]
+for (i in names(nameLookupHyd)) {
+   message(i)
+   vardef <- ncvar_def(i, "", list(wedim, sndim), -9999.0)
+   ncid <- ncvar_add(ncid, vardef)
 }
+nc_close(ncid)
+cmd <- paste0("ncks -O -x -v HGT_M ", hyd2dFile, " ", hyd2dFile)
+print(cmd)
+system(cmd, intern=FALSE)
 
 #### Read parameter tables
 
@@ -127,6 +124,7 @@ if (exists("soilParamFile") && !is.null(soilParamFile)) {
 
 # MPTABLE
 if (exists("mpParamFile") && !is.null(mpParamFile)) {
+   # Veg type params
    mptab <- read.table(mpParamFile, header=FALSE, skip=43, sep=",", comment.char="!", 
                             blank.lines.skip = TRUE, strip.white = TRUE, nrows=80, 
                             stringsAsFactors=FALSE)
@@ -139,6 +137,10 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    mptab$V28 <- NULL
    mptab <- as.data.frame(t(mptab))
    mptab$vegID <- seq(1, nrow(mptab))
+   # Global params
+   gparmLine <- grep("RSURF_EXP", readLines(mpParamFile), value = TRUE)
+   gparmVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   mpglobtab <- list(RSURF_EXP=as.numeric(gparmVal))
 } else {
    message("No MP parameter file found. Exiting.")
    q("no")
@@ -224,6 +226,11 @@ for (param in paramList) {
          ncvar <- ncvar_get(ncid, param)
          pnew <- ncvar*0 + gentab[[paramName]]
          ncvar_put(ncid, param, pnew)
+      } else if (paramName %in% names(mpglobtab)) {
+         print(paste("Updating global MP  parameters:", param, " ", paramName))
+         ncvar <- ncvar_get(ncid, param)
+         pnew <- ncvar*0 + mpglobtab[[paramName]]
+         ncvar_put(ncid, param, pnew)
       }
    }
 }
@@ -262,49 +269,46 @@ if (exists("geoFile") && !is.null(geoFile)) {
 }
 
 # Get new hydro2d file
-for (tag in names(hydTagList)) {
-   hyd2dFileTag <- paste0(hyd2dFile, ".", tag)
-   message(paste0("Updating: ", hyd2dFileTag))
-   ncid <- nc_open(hyd2dFileTag, write=TRUE)
-   paramList <- names(ncid$var)
+message(paste0("Updating: ", hyd2dFile))
+ncid <- nc_open(hyd2dFile, write=TRUE)
+paramList <- names(ncid$var)
 
-   # Loop through params and update
-   for (param in paramList) {
-      paramNameHyd <- nameLookupHyd[[param]]
-      paramNameSoil <- nameLookupSoil[[paramNameHyd]]
-      print(paste0("Processing ", param))
-      if (!is.null(paramNameHyd)) {
-         if (!is.null(paramNameSoil) && paramNameSoil %in% names(soltab)) {
-            print(paste("Updating HYDRO soil parameters:", param, " ", paramNameHyd, " ", paramNameSoil))
-            ncvar <- ncvar_get(ncid, param)
-            pnew <- solmap
-            pnew[!(pnew %in% soltab[,"solID"])] <- (-9999)
-            # Manually force soil and water cells to match
-            pnew[vegmap == vegWater] <- soilWater
-            pnew <- plyr::mapvalues(pnew, from=soltab$solID, to=soltab[,paramNameSoil])
-            pnew[pnew < (-9998)] <- ncvar[pnew < (-9998)]
-            # Manually make some changes to urban cells to match hydro code
-            if ( setUrban ) {
-               if (param == "SMCMAX1") pnew[vegmap == vegUrban & solmap != soilWater] <- 0.45
-               if (param == "SMCREF1") pnew[vegmap == vegUrban & solmap != soilWater] <- 0.42
-               if (param == "SMCWLT1") pnew[vegmap == vegUrban & solmap != soilWater] <- 0.40
-            }
-            ncvar_put(ncid, param, pnew)
-         } else if (paramNameHyd %in% names(hydtab)) {
-            print(paste("Updating HYDRO veg parameters:", param, " ", paramNameHyd))
-            ncvar <- ncvar_get(ncid, param)
-            pnew <- vegmap
-            pnew[!(pnew %in% hydtab[,"vegID"])] <- (-9999)
-            # Manually force soil and water cells to match
-            pnew[solmap == soilWater] <- vegWater
-            pnew <- plyr::mapvalues(pnew, from=hydtab$vegID, to=hydtab[,paramNameHyd])
-            pnew[pnew < 0] <- ncvar[pnew < 0]
-            ncvar_put(ncid, param, pnew)
+# Loop through params and update
+for (param in paramList) {
+   paramNameHyd <- nameLookupHyd[[param]]
+   paramNameSoil <- nameLookupSoil[[paramNameHyd]]
+   print(paste0("Processing ", param))
+   if (!is.null(paramNameHyd)) {
+      if (!is.null(paramNameSoil) && paramNameSoil %in% names(soltab)) {
+         print(paste("Updating HYDRO soil parameters:", param, " ", paramNameHyd, " ", paramNameSoil))
+         ncvar <- ncvar_get(ncid, param)
+         pnew <- solmap
+         pnew[!(pnew %in% soltab[,"solID"])] <- (-9999)
+         # Manually force soil and water cells to match
+         pnew[vegmap == vegWater] <- soilWater
+         pnew <- plyr::mapvalues(pnew, from=soltab$solID, to=soltab[,paramNameSoil])
+         pnew[pnew < (-9998)] <- ncvar[pnew < (-9998)]
+         # Manually make some changes to urban cells to match hydro code
+         if ( setUrban ) {
+            if (param == "SMCMAX1") pnew[vegmap == vegUrban & solmap != soilWater] <- 0.45
+            if (param == "SMCREF1") pnew[vegmap == vegUrban & solmap != soilWater] <- 0.42
+            if (param == "SMCWLT1") pnew[vegmap == vegUrban & solmap != soilWater] <- 0.40
          }
+         ncvar_put(ncid, param, pnew)
+      } else if (paramNameHyd %in% names(hydtab)) {
+         print(paste("Updating HYDRO veg parameters:", param, " ", paramNameHyd))
+         ncvar <- ncvar_get(ncid, param)
+         pnew <- vegmap
+         pnew[!(pnew %in% hydtab[,"vegID"])] <- (-9999)
+         # Manually force soil and water cells to match
+         pnew[solmap == soilWater] <- vegWater
+         pnew <- plyr::mapvalues(pnew, from=hydtab$vegID, to=hydtab[,paramNameHyd])
+         pnew[pnew < 0] <- ncvar[pnew < 0]
+         ncvar_put(ncid, param, pnew)
       }
    }
-   nc_close(ncid)
 }
+nc_close(ncid)
 
 
 q("no")
