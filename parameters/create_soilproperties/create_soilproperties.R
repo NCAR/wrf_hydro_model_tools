@@ -1,6 +1,6 @@
 ############################################################
 # R script to create spatial parameter files from TBLs.
-# Usage: Rscript create_SoilProperties.R 
+# Usage: Rscript create_soilproperties.R 
 # Developed: 11/11/2016, A. Dugger
 # Updated: 07/23/2017, A.Dugger
 #          New functionality to create HYDRO2DTBL.nc.
