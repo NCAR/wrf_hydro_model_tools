@@ -1,6 +1,6 @@
-README_create_WRFinput.txt
+README.txt
 
-Purpose: create_Wrfinput.R is an R script developed for the purpose of creating wrfinput files for
+Purpose: create_wrfinput.R is an R script developed for the purpose of creating wrfinput files for
          the WRF-Hydro model. The script produces fields of spatially uniform initial model states
          of soil moisture, soil temperature, soil liquid water content and skin temperature among
          a few other variables necessary for model cold-start initialization. This script allows 
@@ -8,7 +8,8 @@ Purpose: create_Wrfinput.R is an R script developed for the purpose of creating 
 
 Authors: NCAR WRF-Hydro team
 
-Date: June 2018
+Created: June 2018
+Updated: May 2019
 
 Requirements: R, NCO, and the following R packages: ncdf4 and optparse
 
@@ -17,12 +18,12 @@ Input files:
                    Preprocessing System (WPS)
    
 Output files:
-   wrfinput_d01.nc (default filename) - wrfinput file to initialize the land surface model
+   wrfinput_d01.nc (default filename) - wrfinput file to initialize the Noah-MP land surface model in WRF-Hydro
 
-Usage: ./create_Wrfinput.R --geogrid='geo_em.d01.nc' --filltyp=3 --laimo=8 
+Usage: ./create_wrfinput.R --geogrid='geo_em.d01.nc' --filltyp=3 --laimo=8 
 
 Important notes:
-   * Both filltyp and laimo arguments do have default values however we recommend that users
-     update these to values more appropriate for their domain / simulation.
-   * For information and descriptions of these and other optional arguments run the script
+   * Both filltyp and laimo arguments have default values. However, we recommend that users
+     specify values more appropriate for their domain / simulation.
+   * For more information and descriptions of these and other optional arguments run the script
      with no arguments.
