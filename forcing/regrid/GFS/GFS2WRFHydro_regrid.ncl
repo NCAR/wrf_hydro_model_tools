@@ -63,7 +63,7 @@ begin
    U_varname = "UGRD_P0_L103_GLL0"
    V_varname = "VGRD_P0_L103_GLL0"
    Q_varname = "SPFH_P0_L103_GLL0"
-   PCP_varname  = "PRATE_P0_L1_GLL0" ; or similar 
+   PCP_varname  = "PRATE_P8_L1_GLL0_avg" ; or similar 
    DSWR_varname = "DSWRF_P8_L1_GLL0_avg" ; or similar
    DLWR_varname = "DLWRF_P8_L1_GLL0_avg" ; or similar
 
