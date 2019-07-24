@@ -27,6 +27,8 @@
 ; 
 ; NCAR WRF-Hydro Team
 ; Updated: Mar 20, 2018   K. FitzGerald
+; Updated: Mar 11, 2019   Yongxin Zhang
+; Updated: Jul 24, 2019   K. FitzGerald
 ;
 ;----------------------------------------------------------------------
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
@@ -45,7 +47,7 @@ begin
   ; Set input and output file directories.                        ;
   ;---------------------------------------------------------------;
   dirm    = "./input_files/"       ; directory where source forcing data resides
-  outdir  = "./output_files/"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
+  outdir  = "./"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
 
   ;---------------------------------------------------------------;
   ; Weight filenames for regridding                               ;
@@ -61,7 +63,7 @@ begin
    U_varname = "UGRD_P0_L103_GLL0"
    V_varname = "VGRD_P0_L103_GLL0"
    Q_varname = "SPFH_P0_L103_GLL0"
-   PCP_varname  = "PRATE_P8_L1_GLL0_avg" ; or similar 
+   PCP_varname  = "PRATE_P0_L1_GLL0" ; or similar 
    DSWR_varname = "DSWRF_P8_L1_GLL0_avg" ; or similar
    DLWR_varname = "DLWRF_P8_L1_GLL0_avg" ; or similar
 
@@ -85,24 +87,70 @@ begin
 ;----------------------------------------------------------------------
 ; Open source data files to be regridded...
 ;----------------------------------------------------------------------
-  system("mkdir "+outdir)
 
   datfils = systemfunc ("ls "+dirm+srcFileName)    ; list of file names
   num_datfils     = dimsizes(datfils)
 
   do ifil = 0,num_datfils-1,1   ; loop through datafiles one at a time
-   
-      datfile = addfile( datfils(ifil) + ".grb", "r")
+      
+      datfile = addfile( datfils(ifil) + ".grb2", "r")
 
       print( " ... Open input file : "+ datfils(ifil) )
 
       vnames = getfilevarnames(datfile)
    
      ;----------------------------------------------------------------------
+     ; Parse time from the attributes of any of the variables 
+     ; based on the initial time plus the forecast time.
+     ;----------------------------------------------------------------------
+      var_swap = datfile->$T_varname$
+      ymdt_swap1 = var_swap@initial_time
+      ymdt_swap2 = str_split(ymdt_swap1," ")
+      ymdt_swap3 = str_split(ymdt_swap2(0),"/")
+      yyyy_int  = tointeger(ymdt_swap3(2))
+      mm_int    = tointeger(ymdt_swap3(0))
+      dd_int    = tointeger(ymdt_swap3(1)) 
+
+      ymdt_swap4   = str_split_by_length(ymdt_swap2(1),(/1,2,1,2/))
+      hh_initial   = tointeger(ymdt_swap4(1))
+      hh_forecast  = tointeger(var_swap@forecast_time)
+      hh_integer   = hh_initial + hh_forecast
+
+      hh = sprinti("%0.2i", mod(hh_integer,24))
+
+      hh_int_days  = hh_integer/24      
+
+      doy_initial  = day_of_year(yyyy_int,mm_int,dd_int)
+      doy_forecast = doy_initial + hh_int_days
+
+      if(isleapyear(yyyy_int)) then
+       max_days = 366 
+      else
+       max_days = 365
+      end if
+
+      if(doy_forecast .gt. max_days) then
+       yyyy_int = yyyy_int + 1
+       doy_forecast = doy_forecast - max_days
+      end if
+
+      mmdd_int    = monthday(yyyy_int,doy_forecast)
+      mmdd        = sprinti("%0.4i",mmdd_int)
+      mmdd_split  = str_split_by_length(mmdd,(/2,2/))
+
+      yyyy = tostring(yyyy_int)
+      mm   = mmdd_split(0)
+      dd   = mmdd_split(1)
+     
+      yyyymmddhh = yyyy+mm+dd+hh
+      delete([/var_swap,ymdt_swap1,ymdt_swap2,ymdt_swap3,ymdt_swap4/])
+      delete([/mmdd_split,mmdd_int,mmdd,doy_initial,doy_forecast,max_days/])
+      delete([/yyyy_int,mm_int,dd_int,hh_int_days/])
+      delete([/hh_initial,hh_forecast,hh_integer/])
+     ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile = str_sub_str(datfils(ifil), dirm, outdir)
-      ncfile = ncfile + "_regrid.nc"
+      ncfile = yyyymmddhh+".LDASIN_DOMAIN1.nc"
       if ( isfilepresent( ncfile ) ) then
          system ("/bin/rm "+ncfile)
       end if
@@ -218,8 +266,12 @@ begin
        delete([/var,v4,var2d,wgtFileName/])
      
      end do   ; end do for variable loop
-   
-   end do   ; end do for file loop
 
+     dstFile = str_sub_str(ncfile, ".nc" , "")
+     system( "mv "+ncfile+" "+dstFile)
+     
+     delete([/vnames/])
+       
+   end do   ; end do for file loop
 
 end
