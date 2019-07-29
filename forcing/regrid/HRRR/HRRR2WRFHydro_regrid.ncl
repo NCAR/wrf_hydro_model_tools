@@ -27,6 +27,7 @@
 ; 
 ; NCAR WRF-Hydro Team
 ; Updated: Mar 20, 2018   K. FitzGerald
+; Updated: Mar 11, 2019   Yongxin Zhang
 ;
 ;----------------------------------------------------------------------
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
@@ -45,7 +46,8 @@ begin
   ; Set input and output file directories.                        ;
   ;---------------------------------------------------------------;
   dirm    = "./input_files/"       ; directory where source forcing data resides
-  outdir  = "./output_files/"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
+  ;outdir  = "./output_files/"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
+  outdir  = "./"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
 
   ;---------------------------------------------------------------;
   ; Weight filenames for regridding                               ;
@@ -97,10 +99,61 @@ begin
       print( " ... Open input file : "+ datfils(ifil) )
 
      ;----------------------------------------------------------------------
+     ; Parse time from the attributes of any of the variables
+     ; based on the initial time plus the forecast time.
+     ; Note that if the intial time plus the forecast time is bigger than
+     ; 23 but less than 48 then the day is added by 1.
+     ; If the intial time plus the forecast time is bigger than 47 but
+     ; less than 72 then the day should be added by 2, but this part is not
+     ; added here and the user is encouraged to read this section and add this
+     ; part accordingly if needed.
+     ; Also, the month may need to be changed if the day is added by 1 or 2,
+     ; for example, if the day falls on the last day of the month, then adding
+     ; one day means that the month will need to be added by 1, too.
+     ; Please contact NCAR WRF-Hydro team if further assistance is needed.
+     ;----------------------------------------------------------------------
+      var_swap = datfile->$T_varname$
+      ymdt_swap1 = var_swap@initial_time
+      ymdt_swap2 = str_split(ymdt_swap1," ")
+      ymdt_swap3 = str_split(ymdt_swap2(0),"/")
+      yyyy = ymdt_swap3(2)
+      mm   = ymdt_swap3(0)
+      dd   = ymdt_swap3(1)
+
+      ymdt_swap4  = str_split_by_length(ymdt_swap2(1),(/1,2,1,2/))
+      hh_initial  = ymdt_swap4(1)
+      hh_forecast = var_swap@forecast_time
+      hh_integer  = tointeger(hh_initial) + tointeger(hh_forecast)
+      if(hh_integer.lt.10) then
+       hh = "0"+tostring(hh_integer)
+      else if(hh_integer.ge.10 .and. hh_integer.lt.24) then
+       hh = tostring(hh_integer)
+      else if(hh_integer.ge.24 .and. hh_integer.lt.48) then
+       hh_integer = hh_integer - 24
+       dd_swap = 1 + tointeger(dd)
+        if(hh_integer.lt.10) then
+         hh = "0"+tostring(hh_integer)
+        else
+         hh = tostring(hh_integer)
+        end if
+        if(dd_swap.lt.10) then
+         dd = "0"+tostring(dd_swap)
+        else
+         dd = tostring(dd_swap)
+        end if
+      end if
+      end if
+      end if
+
+      yyyymmddhh = yyyy+mm+dd+hh
+      delete([/var_swap,ymdt_swap1,ymdt_swap2,ymdt_swap3,ymdt_swap4/])
+      delete([/hh_initial,hh_forecast,hh_integer/])
+     ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile = str_sub_str( datfils(ifil), dirm, outdir )   
-      ncfile = str_sub_str( ncfile, ".grib2", "_regrid.nc")
+     ;ncfile = str_sub_str( datfils(ifil), dirm, outdir )   
+     ;ncfile = str_sub_str( ncfile, ".grib2", "_regrid.nc")
+      ncfile = yyyymmddhh+".LDASIN_DOMAIN1.nc"
       if ( isfilepresent( ncfile ) ) then
          system ("/bin/rm "+ncfile)
       end if
@@ -214,6 +267,9 @@ begin
      
      end do   ; end do for variable loop
    
+     dstFile = str_sub_str(ncfile, ".nc" , "")
+     system( "mv "+ncfile+" "+dstFile)
+
    end do   ; end do for file loop
 
 
