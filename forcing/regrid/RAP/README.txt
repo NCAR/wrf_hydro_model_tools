@@ -67,6 +67,9 @@ The RAP data fields used by WRF-Hydro / the regridding scripts are:
 "DSWRF_P0_L1_GLC0" - incoming shortwave radiation
 "DLWRF_P0_L1_GLC0" - incoming longwave radiation
 
+*Note: The current scripts work with the provided input data package and print output filenames that will run in WRF-Hydro. 
+If using other input data you will need to edit the ncl script to make sure that the output filenames are conducive to the WRF-Hydro forcing input filename convention. 
+
 Additional specific usage information for these scripts is provided in the
 header of the script codes.
 
