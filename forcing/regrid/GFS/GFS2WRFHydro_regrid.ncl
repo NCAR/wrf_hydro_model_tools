@@ -28,7 +28,7 @@
 ; NCAR WRF-Hydro Team
 ; Updated: Mar 20, 2018   K. FitzGerald
 ; Updated: Mar 11, 2019   Yongxin Zhang
-; Updated: Jul 24, 2019   K. FitzGerald
+; Updated: Aug 5,  2019   K. FitzGerald
 ;
 ;----------------------------------------------------------------------
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
@@ -47,7 +47,7 @@ begin
   ; Set input and output file directories.                        ;
   ;---------------------------------------------------------------;
   dirm    = "./input_files/"       ; directory where source forcing data resides
-  outdir  = "./"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
+  outdir  = "./output_files/"      ; directory where regridded forcing data will be placed
 
   ;---------------------------------------------------------------;
   ; Weight filenames for regridding                               ;
@@ -147,12 +147,15 @@ begin
       delete([/mmdd_split,mmdd_int,mmdd,doy_initial,doy_forecast,max_days/])
       delete([/yyyy_int,mm_int,dd_int,hh_int_days/])
       delete([/hh_initial,hh_forecast,hh_integer/])
+
      ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile = yyyymmddhh+".LDASIN_DOMAIN1.nc"
+      system("mkdir "+outdir)
+
+      ncfile = str_concat(/outdir,yyyymmddhh+".LDASIN_DOMAIN1.nc"/)
       if ( isfilepresent( ncfile ) ) then
-         system ("/bin/rm "+ncfile)
+         system ("rm "+ncfile)
       end if
       ncdf= addfile(ncfile,"c")
       ncdf->lat = dlat2d   ;output lat
@@ -209,7 +212,7 @@ begin
        ;----------------------------------------------------------------------
         v4 = new((/dims(0), dims(1)/),"double")
        
-       printVarSummary(v4)
+        printVarSummary(v4)
 
        ;---Options to pass to ESMF_regrid--------------------;
      
