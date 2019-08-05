@@ -153,7 +153,7 @@ begin
      ;----------------------------------------------------------------------
       system("mkdir "+outdir)
 
-      ncfile = str_concat(/outdir,yyyymmddhh+".LDASIN_DOMAIN1.nc"/)
+      ncfile = outdir+yyyymmddhh+".LDASIN_DOMAIN1.nc"
       if ( isfilepresent( ncfile ) ) then
          system ("rm "+ncfile)
       end if
