@@ -2,8 +2,8 @@
 # R script to create spatial parameter files from TBLs.
 # Usage: Rscript create_soilproperties.R 
 # Developed: 11/11/2016, A. Dugger
-# Updated: 07/23/2017, A.Dugger
-#          New functionality to create HYDRO2DTBL.nc.
+# Updated: 07/23/2017, New functionality to create HYDRO2DTBL.nc, A. Dugger
+#          03/02/2020, Update MPTABLE.TBL read for new format in WRF-Hydro v5.2.x, A. Dugger
 ############################################################
 
 # Update relevant arguments below.
