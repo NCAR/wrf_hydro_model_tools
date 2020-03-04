@@ -9,7 +9,7 @@ Purpose: create_wrfinput.R is an R script developed for the purpose of creating 
 Authors: NCAR WRF-Hydro team
 
 Created: June 2018
-Updated: May 2019
+Updated: March 2020
 
 Requirements: R, NCO, and the following R packages: ncdf4 and optparse
 

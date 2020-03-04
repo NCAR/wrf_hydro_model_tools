@@ -9,7 +9,8 @@
 #          from M. Barlage.
 # Modified:
 #  - Added command line arguments (J. Mills)
-#  - Added treatment for dealing with 0 SOILTEMP values over water cells
+#  - Added treatment for dealing with 0 SOILTEMP values over water cells (A. Dugger)
+#  - Added ISLAKE masking (K. FitzGerald)
 ############################################################
 
 library(optparse)
@@ -105,6 +106,7 @@ timedim <- ncid$dim[['Time']]
 # Attributes
 gridid <- ncatt_get(ncid, 0)[["GRID_ID"]]
 iswater <- ncatt_get(ncid, 0)[["ISWATER"]]
+islake <- ncatt_get(ncid, 0)[["ISLAKE"]]
 isoilwater <- ncatt_get(ncid, 0)[["ISOILWATER"]]
 isurban <- ncatt_get(ncid, 0)[["ISURBAN"]]                                                             
 isice <- ncatt_get(ncid, 0)[["ISICE"]] 
@@ -121,6 +123,8 @@ soilt[is.na(soilt)] <- soilt_mean
 tmn <- soilt - 0.0065 * ncvar_get(ncid, "HGT")
 
 use <- ncvar_get(ncid, "IVGTYP")
+
+use[use == islake] <- iswater
 
 msk <- use 
 msk[msk == iswater] <- (-9999)
