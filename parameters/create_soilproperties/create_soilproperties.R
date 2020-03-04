@@ -1,6 +1,6 @@
 ############################################################
 # R script to create spatial parameter files from TBLs.
-# Usage: Rscript create_SoilProperties.R 
+# Usage: Rscript create_soilproperties.R 
 # Developed: 11/11/2016, A. Dugger
 # Updated: 07/23/2017, A.Dugger
 #          New functionality to create HYDRO2DTBL.nc.
@@ -125,8 +125,8 @@ if (exists("soilParamFile") && !is.null(soilParamFile)) {
 # MPTABLE
 if (exists("mpParamFile") && !is.null(mpParamFile)) {
    # Veg type params
-   mptab <- read.table(mpParamFile, header=FALSE, skip=43, sep=",", comment.char="!", 
-                            blank.lines.skip = TRUE, strip.white = TRUE, nrows=80, 
+   mptab <- read.table(mpParamFile, header=FALSE, skip=48, sep=",", comment.char="!",
+                            blank.lines.skip = TRUE, strip.white = TRUE, nrows=80,
                             stringsAsFactors=FALSE)
    SepString <- function(x) {trimws(unlist(strsplit(x, split="="))[1])}
    tmp1 <- apply(as.data.frame(mptab$V1), 1, SepString)

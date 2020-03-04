@@ -27,6 +27,8 @@
 ; 
 ; NCAR WRF-Hydro Team
 ; Updated: Mar 20, 2018   K. FitzGerald
+; Updated: Mar 11, 2019   Yongxin Zhang
+; Updated: Aug 5,  2019   K. FitzGerald
 ;
 ;----------------------------------------------------------------------
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
@@ -45,7 +47,7 @@ begin
   ; Set input and output file directories.                        ;
   ;---------------------------------------------------------------;
   dirm    = "./input_files/"       ; directory where source forcing data resides
-  outdir  = "./output_files/"      ; directory where regridded forcing data will be placed. set to dirm for overwriting the original file
+  outdir  = "./output_files/"      ; directory where regridded forcing data will be placed
 
   ;---------------------------------------------------------------;
   ; Weight filenames for regridding                               ;
@@ -97,17 +99,77 @@ begin
       print( " ... Open input file : "+ datfils(ifil) )
 
      ;----------------------------------------------------------------------
+     ; Parse time from the attributes of any of the variables
+     ; based on the initial time plus the forecast time.
+     ; Note that if the intial time plus the forecast time is bigger than
+     ; 23 but less than 48 then the day is added by 1.
+     ; If the intial time plus the forecast time is bigger than 47 but
+     ; less than 72 then the day should be added by 2, but this part is not
+     ; added here and the user is encouraged to read this section and add this
+     ; part accordingly if needed.
+     ; Also, the month may need to be changed if the day is added by 1 or 2,
+     ; for example, if the day falls on the last day of the month, then adding
+     ; one day means that the month will need to be added by 1, too.
+     ; Please contact NCAR WRF-Hydro team if further assistance is needed.
+     ;----------------------------------------------------------------------
+      var_swap = datfile->$T_varname$
+      ymdt_swap1 = var_swap@initial_time
+      ymdt_swap2 = str_split(ymdt_swap1," ")
+      ymdt_swap3 = str_split(ymdt_swap2(0),"/")
+      yyyy_int  = tointeger(ymdt_swap3(2))
+      mm_int    = tointeger(ymdt_swap3(0))
+      dd_int    = tointeger(ymdt_swap3(1)) 
+
+      ymdt_swap4   = str_split_by_length(ymdt_swap2(1),(/1,2,1,2/))
+      hh_initial   = tointeger(ymdt_swap4(1))
+      hh_forecast  = tointeger(var_swap@forecast_time)
+      hh_integer   = hh_initial + hh_forecast
+
+      hh = sprinti("%0.2i", mod(hh_integer,24))
+
+      hh_int_days  = hh_integer/24      
+
+      doy_initial  = day_of_year(yyyy_int,mm_int,dd_int)
+      doy_forecast = doy_initial + hh_int_days
+
+      if(isleapyear(yyyy_int)) then
+       max_days = 366 
+      else
+       max_days = 365
+      end if
+
+      if(doy_forecast .gt. max_days) then
+       yyyy_int = yyyy_int + 1
+       doy_forecast = doy_forecast - max_days
+      end if
+
+      mmdd_int    = monthday(yyyy_int,doy_forecast)
+      mmdd        = sprinti("%0.4i",mmdd_int)
+      mmdd_split  = str_split_by_length(mmdd,(/2,2/))
+
+      yyyy = tostring(yyyy_int)
+      mm   = mmdd_split(0)
+      dd   = mmdd_split(1)
+
+      yyyymmddhh = yyyy+mm+dd+hh
+      delete([/var_swap,ymdt_swap1,ymdt_swap2,ymdt_swap3,ymdt_swap4/])
+      delete([/mmdd_split,mmdd_int,mmdd,doy_initial,doy_forecast,max_days/])
+      delete([/yyyy_int,mm_int,dd_int,hh_int_days/])
+      delete([/hh_initial,hh_forecast,hh_integer/])
+
+     ;----------------------------------------------------------------------
      ; Open output file
      ;----------------------------------------------------------------------
-      ncfile = str_sub_str( datfils(ifil), dirm, outdir )   
-      ncfile = str_sub_str( ncfile, ".grib2", "_regrid.nc")
+      system("mkdir "+outdir)
+
+      ncfile = outdir+yyyymmddhh+".LDASIN_DOMAIN1.nc"
       if ( isfilepresent( ncfile ) ) then
-         system ("/bin/rm "+ncfile)
+         system ("rm "+ncfile)
       end if
       ncdf= addfile(ncfile,"c")
       ncdf->lat = dlat2d   ;output lat
       ncdf->lon = dlon2d   ;output lon
-   
+
      ;----------------------------------------------------------------------
      ;  Processing...no further modifications should be required...
      ;----------------------------------------------------------------------
@@ -214,6 +276,9 @@ begin
      
      end do   ; end do for variable loop
    
+     dstFile = str_sub_str(ncfile, ".nc" , "")
+     system( "mv "+ncfile+" "+dstFile)
+
    end do   ; end do for file loop
 
 
