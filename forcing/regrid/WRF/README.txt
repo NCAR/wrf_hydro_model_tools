@@ -6,7 +6,7 @@ PURPOSE
 Scripts to regrid WRF data to a WRF-Hydro domain using the ESMF
 regridding functions within the NCAR Command Language (NCL). 
 
-Updated: 5/14/2019     K. FitzGerald, NCAR/RAL
+Updated: 6/21/2020     K. FitzGerald, NCAR/RAL
 
 SOFTWARE REQUIREMENTS
 
@@ -30,7 +30,6 @@ The steps are as follows:
    script. Users will need to provide the source and destination grid filenames 
    as arguments to the script.
 
-
 2. The second step is to then do the regridding using the 
    'WRF2WRFHydro_regrid.ncl' script which ingests both source data and the 
    relevant weight file as inputs and then outputs regridded data on the 
@@ -51,17 +50,19 @@ Input file requirements:
 
 The WRF data fields used by WRF-Hydro / the regridding scripts are:
 
-""   - latitude
-""   - longitude
+"XLAT"   - latitude
+"XLONG"  - longitude
 "PSFC"   - pressure
-"T2"  - air temperature
-"U10" - wind speed - u direction
-"V10" - wind speed - v direction
-"Q2" - specific humidity 
+"T2"     - air temperature
+"U10"    - wind speed - u direction
+"V10"    - wind speed - v direction
+"Q2"     - specific humidity 
 "RAINNC" - non-convective precipitation
-"RAINC" - convective precipitation
-"" - incoming shortwave radiation
-"" - incoming longwave radiation
+"RAINC"  - convective precipitation
+"SWDOWN" - incoming shortwave radiation
+"GLW"    - incoming longwave radiation
+"VEGFRA" - vegetation fraction (required for WRF forcing option)
+"LAI"    - leaf area index (required only for WRF forcing option)
 
 Additional specific usage information for these scripts is provided in the
 header of the script codes.
@@ -73,7 +74,7 @@ NOTES on the use of 'WRF2WRFHydro_generate_weights.ncl':
 1. This script may take a while to run. 
 2. Note that runtime increases with larger domain sizes and higher resolution.
 
-Example Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_files/rap.t14z.awp130bgrbf01.grib2"' 'dstGridName="geo_em.d01.nc"' RAP2WRFHydro_generate_weights.ncl
+Example Usage: ncl 'interp_opt="bilinear"' 'srcGridName="input_files/wrfout_d01_2013-09-10_00:00:00"' 'dstGridName="geo_em.d02.nc"' WRF2WRFHydro_generate_weights.ncl
 
            interp_opt = conserve / bilinear 
            srcGridName = name of file that contains source grid  
@@ -86,20 +87,19 @@ Running 'WRF2WRFHydro_regrid.ncl':
 ################################################################################
 NOTES on the use of WRF2WRFHydro_regrid.ncl:
 1. This script will use the regridding weight files created by the 
-   'RAP2WRFHydro_generate_weights.ncl' script. Therefore, do not change the
+   'WRF2WRFHydro_generate_weights.ncl' script. Therefore, do not change the
    names of those files or else this script will not be able to find them.
-2. The source data to be regridded (RAP forcing data with the default 
+2. The source data to be regridded (WRF forcing data with the default 
    filenames) needs to be placed in a local directory called 'input_files/'
 3. The output data created from this script will be placed in a local directory
    called 'output_files/'. If this directory is not present the script will
    create it.
 
 
-Example Usage   : ncl 'srcFileName="rap.*.grib2"' 'dstGridName="geo_em.d01.nc"' RAP2WRFHydro_regrid.ncl
+Example Usage   : ncl 'srcFileName="wrfout*"' 'dstGridName="geo_em.d02.nc"' WRF2WRFHydro_regrid.ncl
 
-          srcFileName = filename pattern of the souce RAP files.
-                        e.g., "rap.t14z.awp130bgrbf01.grib2",
-                        "rap.*.grib2" , ...
+          srcFileName = filename pattern of the souce WRF files.
+                        e.g. "wrfout*"
           dstGridName = name of file that contains the destination (WRF-Hydro)
                         grid
 
