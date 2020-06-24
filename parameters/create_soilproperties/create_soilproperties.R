@@ -2,8 +2,8 @@
 # R script to create spatial parameter files from TBLs.
 # Usage: Rscript create_soilproperties.R 
 # Developed: 11/11/2016, A. Dugger
-# Updated: 07/23/2017, A.Dugger
-#          New functionality to create HYDRO2DTBL.nc.
+# Updated: 07/23/2017, New functionality to create HYDRO2DTBL.nc, A. Dugger
+#          03/02/2020, Update MPTABLE.TBL read for new format in WRF-Hydro v5.2.x, A. Dugger
 ############################################################
 
 # Update relevant arguments below.
@@ -182,10 +182,12 @@ if (exists("geoFile") && !is.null(geoFile)) {
    solmap <- ncvar_get(geoin, "SCT_DOM")
    # Get some attributes
    vegWater <- ncatt_get(geoin, 0)[["ISWATER"]]
+   vegLake <- ncatt_get(geoin, 0)[["ISLAKE"]]
    soilWater <- ncatt_get(geoin, 0)[["ISOILWATER"]]
    maxSoilClass <- geoin$dim[["soil_cat"]]$len
    vegUrban <- ncatt_get(geoin, 0)[["ISURBAN"]]
-   message(paste0("Geogrid attributes: vegWater=", vegWater, " soilWater=", soilWater, " maxSoilClass=", maxSoilClass))
+   message(paste0("Geogrid attributes: vegWater=", vegWater, " vegLake=", vegLake, " soilWater=", soilWater, " maxSoilClass=", maxSoilClass))
+   vegmap[vegmap == vegLake] <- vegWater
    solmap[vegmap != vegWater & solmap == soilWater] <- soilFillVal
    solmap[vegmap == vegWater] <- soilWater
    nc_close(geoin)
