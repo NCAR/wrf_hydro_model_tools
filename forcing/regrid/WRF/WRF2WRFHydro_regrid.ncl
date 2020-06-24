@@ -1,22 +1,29 @@
 ;----------------------------------------------------------------------
 ;
+; Name    : WRF2WRFHydro_regrid.ncl
 ;
-; Remarks : (1) Assumes that wrfout files are hourly output. (-- important for
-;               computing rainrate.
-;           (2) ESMF regridding performed with "conserve" option for precipitation
-;               and SWE. All other variables use bilinear option for remapping. 
+; Purpose : This is an NCL script that uses ESMF utilities to perform regridding of various 
+;           data fields to a WRF-Hydro domain.
+;
+;           Note that before running this script you will need to run the 
+;           WRF2WRFHydro_generate_weights.ncl script to generate the required weight
+;           file(s) for your chosen regridding option(s). 
+;
+;           Important notes:
+;           1) This script is currently configured to use the bilinear interpolation option for all forcing 
+;              fields except precipitation which uses conservative regridding.  Should the user desire to use
+;              different interpolation options, the name for the
+;              corresponding weight file should be added to user settings and the weight files for each 
+;              variable adjusted appropriately.
+;
+; Example Usage : ncl 'srcFileName="wrfout*"' 'dstGridName="geo_em.d02.nc"' WRF2WRFHydro_regrid.ncl
+;
+;           srcFileName = filename pattern of the source files
+;                         e.g. "wrfout_d01*"
+;           dstGridName = name of file that contains the destination (WRF-Hydro) grid
 ;
 ;
-; Usage   : ncl 'RUNNAME="BASELINE"' 'wrf_domain_name="d03"' \
-;               'srcfilename="wrfout_d03*"' WRF2WRFHydro_regrid.ncl 
-;
-;           RUNNAME     = name of wrf run.  This is used for the input path and the weight filename.
-;           wrf_domain_name = domain name (d01, d02, d03) which is used to identify the weight file.
-;           srcfilename = filename pattern of the souce wrfout files. Should have matching domain number.
-;                         e.g., "wrfout_d01_2007-09-01_00_00_00.nc", "wrfout_d01_2007*.nc"
-;                               "wrfout_d01_2007-09-0[1-3].nc"
-;
-; Updated: May 14, 2019     K. FitzGerald 
+; Updated: June 24, 2020     K. FitzGerald 
 ;----------------------------------------------------------------------
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
@@ -30,16 +37,11 @@ begin
 ; User settings
 ;----------------------------------------------------------------------
 
-dstGridName=""
-
-dirm = ""
-
-srcfilename=""
-
   ;---------------------------------------------------------------;
   ; Weight filenames for regridding                               ;
   ;---------------------------------------------------------------;
   wgtFileName_bilinear = "./WRF2WRFHydro_weight_bilinear.nc"
+  wgtFileName_conserve = "./WRF2WRFHydro_weight_bilinear.nc"
 
   ;---------------------------------------------------------------;
   ; Data field names from the source file to be regridded         ;
@@ -66,8 +68,6 @@ srcfilename=""
   dlat2d=dstfile->XLAT_M(0,:,:)
   dims=dimsizes(dlat2d)
   
-  flag=0    ;WRF - flag for removing accum precip... (DO NOT CHANGE THIS)
-
 ;----------------------------------------------------------------------
 ; Open source data files to be regridded...
 ;----------------------------------------------------------------------
@@ -77,27 +77,23 @@ srcfilename=""
      system("mkdir "+outdir)
   end if
 
-  datfils = systemfunc ("ls "+dirm+srcfilename)    ;list of file names
+  datfils = systemfunc ("ls input_files/"+srcFileName)    ;list of file names
   num_datfils     = dimsizes(datfils)
-
-  num_datfils = 3	;To test only with one file
 
   do ifil = 0,num_datfils-1,1   ; loop through datafiles one at a time
       
       datfile = addfile( datfils(ifil), "r")
+      sTime=datfile->Times
    
       print( " ... Open input file : "+ datfils(ifil) )
 
 
-     ;names  = getfilevarnames(datfile) 
-   
      ;-----------------------------------------------------------------
      ; Temporary output
      ;-----------------------------------------------------------------
       File = datfils(ifil)
       strs = str_split( File, "/")
-      ;print(strs)
-      sub_str = strs(7)     ; BE CAREFUL to pick the correct strig
+      sub_str = strs(dimsizes(strs)-1)     ; BE CAREFUL to pick the correct strig
       dtime_map = (/30/)
       outF = str_split_by_length(sub_str,dtime_map)
 
@@ -111,6 +107,7 @@ srcfilename=""
       print(ncdf)
       
       filedimdef( ncdf ,"Time",-1,True)
+      ncdf->Time = sTime   ;output time
       ncdf->lat = dlat2d   ;output lat
       ncdf->lon = dlon2d   ;output lon
    
@@ -141,11 +138,11 @@ srcfilename=""
         end if
         if (v.eq.6) then
            var = datfile->$PCP_varname$
-           wgtFileName = wgtFileName_bilinear 
+           wgtFileName = wgtFileName_conserve 
         end if
         if (v.eq.7) then
            var = datfile->$PCP2_varname$
-           wgtFileName = wgtFileName_bilinear 
+           wgtFileName = wgtFileName_conserve 
         end if
         if (v.eq.8) then
            var = datfile->$DSWR_varname$
@@ -205,7 +202,6 @@ srcfilename=""
        
        if (v.eq.1) then
               ncdf->T2 = v4
-              ;filevarattdef(ncdf,"T2",var2d) 
        else if (v.eq.2) then
               ncdf->Q2 = v4
        else if (v.eq.3) then

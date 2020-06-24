@@ -15,14 +15,14 @@
 ;              option specified in the command line.
 ;
 ; 
-; Example Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_data/wrfout_d0?_"' 'dstGridName="geo_em.d01.nc"' WRF2WRFHydro_generate_weights.ncl
+; Example Usage    : ncl 'interp_opt="bilinear"' 'srcGridName="input_data/wrfout_d01_2013-09-10_00:00:00"' 'dstGridName="geo_em.d02.nc"' WRF2WRFHydro_generate_weights.ncl
 ;
 ;            interp_opt = conserve / bilinear 
 ;            srcGridName = name of file that contains source grid
 ;            dstGridName = name of file that contains the destination (WRF-Hydro) grid
 ;
 ; NCAR WRF-Hydro Team
-; Updated: May 14, 2019   K. FitzGerald
+; Updated: June 24, 2020   K. FitzGerald
 ;            
 ;----------------------------------------------------------------------
 ;

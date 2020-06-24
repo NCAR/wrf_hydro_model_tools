@@ -6,7 +6,7 @@ PURPOSE
 Scripts to regrid WRF data to a WRF-Hydro domain using the ESMF
 regridding functions within the NCAR Command Language (NCL). 
 
-Updated: 6/21/2020     K. FitzGerald, NCAR/RAL
+Updated: 6/24/2020     K. FitzGerald, NCAR/RAL
 
 SOFTWARE REQUIREMENTS
 
