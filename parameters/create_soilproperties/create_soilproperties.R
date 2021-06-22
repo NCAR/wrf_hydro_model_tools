@@ -43,6 +43,13 @@ soilFillVal <- 3
 # default parameters, set to FALSE. There should be no answer differences either way.
 setUrban <- FALSE
 
+#### Land cover classification system?
+# Options: USGS or MODIS
+landClass <- "USGS"
+
+#### Number of soil layers (e.g., 4)
+# This number should be consistent with the nsoil in the geogrid IF you choose the updateTexture option.
+nsoil <- 4
 
 #######################################################
 # Do not update below here.
@@ -60,7 +67,9 @@ var3d <- c("smcref", "dwsat", "smcdry", "smcwlt", "bexp", "dksat", "psisat", "qu
 # Hydro 2D Table
 nameLookupHyd <- list(SMCMAX1="smcmax", SMCREF1="smcref", SMCWLT1="smcwlt", 
                    OV_ROUGH2D="OV_ROUGH2D", LKSAT="dksat")
-
+# MPTABLE parsing
+if (landClass == "USGS") mpskip <- 48
+if (landClass == "MODIS") mpskip <- 191
 
 #### Create new soil properties file with fill values
 
@@ -70,7 +79,7 @@ system(cmd, intern=FALSE)
 ncid <- nc_open(slpropFile, write=TRUE)
 sndim <- ncid$dim[['south_north']]
 wedim <- ncid$dim[['west_east']]
-soildim <- ncdim_def("soil_layers_stag", "", vals=1:4, create_dimvar=FALSE)
+soildim <- ncdim_def("soil_layers_stag", "", vals=1:nsoil, create_dimvar=FALSE)
 timedim <- ncid$dim[['Time']]
 for (i in names(nameLookupSoil)) {
    message(i)
@@ -125,7 +134,7 @@ if (exists("soilParamFile") && !is.null(soilParamFile)) {
 # MPTABLE
 if (exists("mpParamFile") && !is.null(mpParamFile)) {
    # Veg type params
-   mptab <- read.table(mpParamFile, header=FALSE, skip=48, sep=",", comment.char="!",
+   mptab <- read.table(mpParamFile, header=FALSE, skip=mpskip, sep=",", comment.char="!",
                             blank.lines.skip = TRUE, strip.white = TRUE, nrows=80,
                             stringsAsFactors=FALSE)
    SepString <- function(x) {trimws(unlist(strsplit(x, split="="))[1])}
@@ -241,7 +250,7 @@ nc_close(ncid)
 # Update texture class variables
 if (updateTexture) {
    message("Updating texture classes")
-   lyrList <- list(top=list(indx=1, splitlyr="SOILCTOP", mglyr="SCT_DOM"), bot=list(indx=4, splitlyr="SOILCBOT", mglyr="SCB_DOM"))
+   lyrList <- list(top=list(indx=1, splitlyr="SOILCTOP", mglyr="SCT_DOM"), bot=list(indx=nsoil, splitlyr="SOILCBOT", mglyr="SCB_DOM"))
    ncid <- nc_open(geoFile, write=TRUE)
    for (lyr in names(lyrList)) {
       # Get relevant variable/layer

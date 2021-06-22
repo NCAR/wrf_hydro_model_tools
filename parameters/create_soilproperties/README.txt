@@ -6,7 +6,7 @@ Purpose: create_soilproperties.R is an R script developed for the purpose of cre
 Authors: NCAR WRF-Hydro team
 
 Created: February 2018
-Updated: March 2020
+Updated: Oct 2020
 
 Requirements: R, NCO, and the following R packages: ncdf4, stringr, plyr 
 
@@ -32,5 +32,7 @@ Instructions (users need to complete the following prior to running the script):
 4. Update script to specify the desired soil category value to be used in case of conflicts between
    soil water and land cover water cells (Note: this is the soilFillVal variable)
 5. Decide whether or not to show hard-coded urban soil parameters
+6. Choose whether your input geogrid is using the USGS or MODIS land cover classification system.
+7. Specify the number of soil layers in your input geogrid.
 
 Usage: Rscript create_soilproperties.R
