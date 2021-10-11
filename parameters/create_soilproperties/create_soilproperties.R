@@ -143,7 +143,9 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    tmp2 <- apply(as.data.frame(mptab$V1), 1, SepString)
    mptab$V1 <- tmp2  
    rownames(mptab) <- tmp1
-   mptab$V28 <- NULL
+  # mptab$V28 <- NULL
+   if (landClass == "USGS") mptab$V28 <- NULL
+   if (landClass == "MODIS") mptab$V21 <- NULL
    mptab <- as.data.frame(t(mptab))
    mptab$vegID <- seq(1, nrow(mptab))
    # Global params
