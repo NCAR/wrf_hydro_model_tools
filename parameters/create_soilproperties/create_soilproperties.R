@@ -11,11 +11,16 @@
 #### Input geogrid:
 geoFile <- "geo_em.d01.nc"
 
+#### Land cover classification system?
+# Options: USGS or MODIS
+landClass <- "MODIS"
+
 #### Input parameter tables:
 soilParamFile <- "SOILPARM.TBL"
 mpParamFile <- "MPTABLE.TBL"
 genParamFile <- "GENPARM.TBL"
-hydParamFile <- "HYDRO.TBL"
+if (landClass == "USGS") hydParamFile <- "HYDRO.TBL"
+if (landClass == "MODIS") hydParamFile <- "HYDRO_MODIS.TBL"
 
 #### Output files to create: 
 # IMPORTANT: The netcdf files below will be overwritten if they exist!
@@ -42,10 +47,6 @@ soilFillVal <- 3
 # If you want to show these in your hyd2dFile parameter file, set this to TRUE. If you want to show
 # default parameters, set to FALSE. There should be no answer differences either way.
 setUrban <- FALSE
-
-#### Land cover classification system?
-# Options: USGS or MODIS
-landClass <- "USGS"
 
 #### Number of soil layers (e.g., 4)
 # This number should be consistent with the nsoil in the geogrid IF you choose the updateTexture option.
@@ -143,7 +144,9 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    tmp2 <- apply(as.data.frame(mptab$V1), 1, SepString)
    mptab$V1 <- tmp2  
    rownames(mptab) <- tmp1
-   mptab$V28 <- NULL
+  # mptab$V28 <- NULL
+   if (landClass == "USGS") mptab$V28 <- NULL
+   if (landClass == "MODIS") mptab$V21 <- NULL
    mptab <- as.data.frame(t(mptab))
    mptab$vegID <- seq(1, nrow(mptab))
    # Global params
