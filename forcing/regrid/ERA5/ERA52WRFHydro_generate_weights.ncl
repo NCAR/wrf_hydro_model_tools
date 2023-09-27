@@ -59,7 +59,7 @@ begin
 ;----------------------------------------------------------------------
 ; Convert source grid to a SCRIP convention file.
 ;----------------------------------------------------------------------
-    src_file = addfile(srcGridName + ".nc" ,"r")
+    src_file = addfile(srcGridName + ".grib" ,"r") ; It depens on your ERA5 format.
     vNames   = getfilevarnames( src_file )
 
     if ( isfilevar( src_file, LatName ) .and. isfilevar( src_file, LonName ) ) then
