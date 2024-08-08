@@ -62,7 +62,8 @@ nameLookupSoil <- list(smcref="REFSMC", dwsat="SATDW", smcdry="DRYSMC", smcwlt="
                    bexp="BB", dksat="SATDK", psisat="SATPSI", quartz="QTZ",
                    refdk="REFDK", refkdt="REFKDT", slope="SLOPE", smcmax="MAXSMC",
                    cwpvt="CWPVT", vcmx25="VCMX25", mp="MP", hvt="HVT", mfsno="MFSNO",
-                   rsurfexp="RSURF_EXP")
+                   rsurfexp="RSURF_EXP", rsurfsnow="RSURF_SNOW", scamax="SCAMAX",
+                   ssi="SSI", snowretfac="SNOW_RET_FAC", tau0="TAU0")
 var3d <- c("smcref", "dwsat", "smcdry", "smcwlt", "bexp", "dksat", "psisat", "quartz", "smcmax")
 # Hydro 2D Table
 nameLookupHyd <- list(SMCMAX1="smcmax", SMCREF1="smcref", SMCWLT1="smcwlt", 
@@ -149,8 +150,21 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    mptab$vegID <- seq(1, nrow(mptab))
    # Global params
    gparmLine <- grep("RSURF_EXP", readLines(mpParamFile), value = TRUE)
-   gparmVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
-   mpglobtab <- list(RSURF_EXP=as.numeric(gparmVal))
+   rexpVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("RSURF_SNOW", readLines(mpParamFile), value = TRUE)
+   rsnowVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("SCAMAX", readLines(mpParamFile), value = TRUE)
+   scaVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("SSI", readLines(mpParamFile), value = TRUE)
+   ssiVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("SNOW_RET_FAC", readLines(mpParamFile), value = TRUE)
+   snowretVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("TAU0", readLines(mpParamFile), value = TRUE)
+   tauVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+
+   mpglobtab <- list(RSURF_EXP=as.numeric(rexpVal), RSURF_SNOW=as.numeric(rsnowVal),
+                     SCAMAX=as.numeric(scaVal), SSI=as.numeric(ssiVal),
+                     SNOW_RET_FAC=as.numeric(snowretVal), TAU0=as.numeric(tauVal))
 } else {
    message("No MP parameter file found. Exiting.")
    q("no")
