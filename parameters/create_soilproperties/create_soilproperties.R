@@ -84,9 +84,9 @@ timedim <- ncid$dim[['Time']]
 for (i in names(nameLookupSoil)) {
    message(i)
    if (i %in% var3d) {
-      vardef <- ncvar_def(i, "", list(wedim, sndim, soildim, timedim), -9999.0)
+      vardef <- ncvar_def(i, "", list(wedim, sndim, soildim, timedim), missval=-9999.0)
    } else {
-      vardef <- ncvar_def(i, "", list(wedim, sndim, timedim), -9999.0)
+      vardef <- ncvar_def(i, "", list(wedim, sndim, timedim), missval=-9999.0)
    }
    ncid <- ncvar_add(ncid, vardef)
 }
@@ -143,7 +143,8 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    tmp2 <- apply(as.data.frame(mptab$V1), 1, SepString)
    mptab$V1 <- tmp2  
    rownames(mptab) <- tmp1
-   mptab$V28 <- NULL
+   if (landClass == "USGS") mptab$V28 <- NULL
+   if (landClass == "MODIS") mptab$V21 <- NULL
    mptab <- as.data.frame(t(mptab))
    mptab$vegID <- seq(1, nrow(mptab))
    # Global params
@@ -235,11 +236,13 @@ for (param in paramList) {
       } else if (paramName %in% names(gentab)) {
          print(paste("Updating GEN parameters:", param, " ", paramName))
          ncvar <- ncvar_get(ncid, param)
+         ncvar[is.na(ncvar)] <- 0
          pnew <- ncvar*0 + gentab[[paramName]]
          ncvar_put(ncid, param, pnew)
       } else if (paramName %in% names(mpglobtab)) {
          print(paste("Updating global MP  parameters:", param, " ", paramName))
          ncvar <- ncvar_get(ncid, param)
+         ncvar[is.na(ncvar)] <- 0
          pnew <- ncvar*0 + mpglobtab[[paramName]]
          ncvar_put(ncid, param, pnew)
       }
