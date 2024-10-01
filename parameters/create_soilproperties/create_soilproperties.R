@@ -67,7 +67,7 @@ nameLookupSoil <- list(smcref="REFSMC", dwsat="SATDW", smcdry="DRYSMC", smcwlt="
 var3d <- c("smcref", "dwsat", "smcdry", "smcwlt", "bexp", "dksat", "psisat", "quartz", "smcmax")
 # Hydro 2D Table
 nameLookupHyd <- list(SMCMAX1="smcmax", SMCREF1="smcref", SMCWLT1="smcwlt", 
-                   OV_ROUGH2D="OV_ROUGH2D", LKSAT="dksat")
+                   OV_ROUGH2D="OV_ROUGH2D", LKSAT="dksat", NEXP="NEXP")
 # MPTABLE parsing
 if (landClass == "USGS") mpskip <- 48
 if (landClass == "MODIS") mpskip <- 191
@@ -107,7 +107,7 @@ sndim <- ncid$dim[['south_north']]
 wedim <- ncid$dim[['west_east']]
 for (i in names(nameLookupHyd)) {
    message(i)
-   vardef <- ncvar_def(i, "", list(wedim, sndim), -9999.0)
+   vardef <- ncvar_def(i, "", list(wedim, sndim), missval=-9999.0)
    ncid <- ncvar_add(ncid, vardef)
 }
 nc_close(ncid)
@@ -333,6 +333,12 @@ for (param in paramList) {
          pnew <- plyr::mapvalues(pnew, from=hydtab$vegID, to=hydtab[,paramNameHyd])
          pnew[pnew < 0] <- ncvar[pnew < 0]
          ncvar_put(ncid, param, pnew)
+      } else if (paramNameHyd == "NEXP") {
+         # Setting this to a global initial value of 1.0
+         print(paste("Updating HYDRO global parameters:", param, " ", paramNameHyd))
+         ncvar <- ncvar_get(ncid, param)
+         ncvar[,] <- 1.0
+         ncvar_put(ncid, param, ncvar)
       }
    }
 }
