@@ -63,7 +63,8 @@ nameLookupSoil <- list(smcref="REFSMC", dwsat="SATDW", smcdry="DRYSMC", smcwlt="
                    refdk="REFDK", refkdt="REFKDT", slope="SLOPE", smcmax="MAXSMC",
                    cwpvt="CWPVT", vcmx25="VCMX25", mp="MP", hvt="HVT", mfsno="MFSNO",
                    rsurfexp="RSURF_EXP", rsurfsnow="RSURF_SNOW", scamax="SCAMAX",
-                   ssi="SSI", snowretfac="SNOW_RET_FAC", tau0="TAU0")
+                   ssi="SSI", snowretfac="SNOW_RET_FAC", tau0="TAU0",
+                   AXAJ="AXAJ", BXAJ="BXAJ", XXAJ="XXAJ")
 var3d <- c("smcref", "dwsat", "smcdry", "smcwlt", "bexp", "dksat", "psisat", "quartz", "smcmax")
 # Hydro 2D Table
 nameLookupHyd <- list(SMCMAX1="smcmax", SMCREF1="smcref", SMCWLT1="smcwlt", 
@@ -236,9 +237,14 @@ for (param in paramList) {
          pnew <- solmap
          pnew[!(pnew %in% soltab[,"solID"])] <- (-9999)
          pnew <- plyr::mapvalues(pnew, from=soltab$solID, to=soltab[,paramName])
-         pnew3d <- array(rep(pnew, dim(ncvar)[3]), dim=dim(ncvar))
-         pnew3d[pnew3d < (-9998)] <- ncvar[pnew3d < (-9998)]
-         ncvar_put(ncid, param, pnew3d)
+         if (param %in% var3d) {
+           pnew3d <- array(rep(pnew, dim(ncvar)[3]), dim=dim(ncvar))
+           pnew3d[pnew3d < (-9998)] <- ncvar[pnew3d < (-9998)]
+           ncvar_put(ncid, param, pnew3d)
+         } else {
+           pnew[pnew < (-9998)] <- ncvar[pnew < (-9998)]
+           ncvar_put(ncid, param, pnew)
+         }
       } else if (paramName %in% names(mptab)) {
          print(paste("Updating MP parameters:", param, " ", paramName))
          ncvar <- ncvar_get(ncid, param)
