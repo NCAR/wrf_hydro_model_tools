@@ -62,11 +62,13 @@ nameLookupSoil <- list(smcref="REFSMC", dwsat="SATDW", smcdry="DRYSMC", smcwlt="
                    bexp="BB", dksat="SATDK", psisat="SATPSI", quartz="QTZ",
                    refdk="REFDK", refkdt="REFKDT", slope="SLOPE", smcmax="MAXSMC",
                    cwpvt="CWPVT", vcmx25="VCMX25", mp="MP", hvt="HVT", mfsno="MFSNO",
-                   rsurfexp="RSURF_EXP")
+                   rsurfexp="RSURF_EXP", rsurfsnow="RSURF_SNOW", scamax="SCAMAX",
+                   ssi="SSI", snowretfac="SNOW_RET_FAC", tau0="TAU0",
+                   AXAJ="AXAJ", BXAJ="BXAJ", XXAJ="XXAJ")
 var3d <- c("smcref", "dwsat", "smcdry", "smcwlt", "bexp", "dksat", "psisat", "quartz", "smcmax")
 # Hydro 2D Table
 nameLookupHyd <- list(SMCMAX1="smcmax", SMCREF1="smcref", SMCWLT1="smcwlt", 
-                   OV_ROUGH2D="OV_ROUGH2D", LKSAT="dksat")
+                   OV_ROUGH2D="OV_ROUGH2D", LKSAT="dksat", NEXP="NEXP")
 # MPTABLE parsing
 if (landClass == "USGS") mpskip <- 48
 if (landClass == "MODIS") mpskip <- 191
@@ -84,9 +86,9 @@ timedim <- ncid$dim[['Time']]
 for (i in names(nameLookupSoil)) {
    message(i)
    if (i %in% var3d) {
-      vardef <- ncvar_def(i, "", list(wedim, sndim, soildim, timedim), -9999.0)
+      vardef <- ncvar_def(i, "", list(wedim, sndim, soildim, timedim), missval=-9999.0)
    } else {
-      vardef <- ncvar_def(i, "", list(wedim, sndim, timedim), -9999.0)
+      vardef <- ncvar_def(i, "", list(wedim, sndim, timedim), missval=-9999.0)
    }
    ncid <- ncvar_add(ncid, vardef)
 }
@@ -106,7 +108,7 @@ sndim <- ncid$dim[['south_north']]
 wedim <- ncid$dim[['west_east']]
 for (i in names(nameLookupHyd)) {
    message(i)
-   vardef <- ncvar_def(i, "", list(wedim, sndim), -9999.0)
+   vardef <- ncvar_def(i, "", list(wedim, sndim), missval=-9999.0)
    ncid <- ncvar_add(ncid, vardef)
 }
 nc_close(ncid)
@@ -143,13 +145,27 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    tmp2 <- apply(as.data.frame(mptab$V1), 1, SepString)
    mptab$V1 <- tmp2  
    rownames(mptab) <- tmp1
-   mptab$V28 <- NULL
+   if (landClass == "USGS") mptab$V28 <- NULL
+   if (landClass == "MODIS") mptab$V21 <- NULL
    mptab <- as.data.frame(t(mptab))
    mptab$vegID <- seq(1, nrow(mptab))
    # Global params
    gparmLine <- grep("RSURF_EXP", readLines(mpParamFile), value = TRUE)
-   gparmVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
-   mpglobtab <- list(RSURF_EXP=as.numeric(gparmVal))
+   rexpVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("RSURF_SNOW", readLines(mpParamFile), value = TRUE)
+   rsnowVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("SCAMAX", readLines(mpParamFile), value = TRUE)
+   scaVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("SSI", readLines(mpParamFile), value = TRUE)
+   ssiVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("SNOW_RET_FAC", readLines(mpParamFile), value = TRUE)
+   snowretVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   gparmLine <- grep("TAU0", readLines(mpParamFile), value = TRUE)
+   tauVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+
+   mpglobtab <- list(RSURF_EXP=as.numeric(rexpVal), RSURF_SNOW=as.numeric(rsnowVal),
+                     SCAMAX=as.numeric(scaVal), SSI=as.numeric(ssiVal),
+                     SNOW_RET_FAC=as.numeric(snowretVal), TAU0=as.numeric(tauVal))
 } else {
    message("No MP parameter file found. Exiting.")
    q("no")
@@ -221,9 +237,14 @@ for (param in paramList) {
          pnew <- solmap
          pnew[!(pnew %in% soltab[,"solID"])] <- (-9999)
          pnew <- plyr::mapvalues(pnew, from=soltab$solID, to=soltab[,paramName])
-         pnew3d <- array(rep(pnew, dim(ncvar)[3]), dim=dim(ncvar))
-         pnew3d[pnew3d < (-9998)] <- ncvar[pnew3d < (-9998)]
-         ncvar_put(ncid, param, pnew3d)
+         if (param %in% var3d) {
+           pnew3d <- array(rep(pnew, dim(ncvar)[3]), dim=dim(ncvar))
+           pnew3d[pnew3d < (-9998)] <- ncvar[pnew3d < (-9998)]
+           ncvar_put(ncid, param, pnew3d)
+         } else {
+           pnew[pnew < (-9998)] <- ncvar[pnew < (-9998)]
+           ncvar_put(ncid, param, pnew)
+         }
       } else if (paramName %in% names(mptab)) {
          print(paste("Updating MP parameters:", param, " ", paramName))
          ncvar <- ncvar_get(ncid, param)
@@ -235,11 +256,13 @@ for (param in paramList) {
       } else if (paramName %in% names(gentab)) {
          print(paste("Updating GEN parameters:", param, " ", paramName))
          ncvar <- ncvar_get(ncid, param)
+         ncvar[is.na(ncvar)] <- 0
          pnew <- ncvar*0 + gentab[[paramName]]
          ncvar_put(ncid, param, pnew)
       } else if (paramName %in% names(mpglobtab)) {
          print(paste("Updating global MP  parameters:", param, " ", paramName))
          ncvar <- ncvar_get(ncid, param)
+         ncvar[is.na(ncvar)] <- 0
          pnew <- ncvar*0 + mpglobtab[[paramName]]
          ncvar_put(ncid, param, pnew)
       }
@@ -316,6 +339,12 @@ for (param in paramList) {
          pnew <- plyr::mapvalues(pnew, from=hydtab$vegID, to=hydtab[,paramNameHyd])
          pnew[pnew < 0] <- ncvar[pnew < 0]
          ncvar_put(ncid, param, pnew)
+      } else if (paramNameHyd == "NEXP") {
+         # Setting this to a global initial value of 1.0
+         print(paste("Updating HYDRO global parameters:", param, " ", paramNameHyd))
+         ncvar <- ncvar_get(ncid, param)
+         ncvar[,] <- 1.0
+         ncvar_put(ncid, param, ncvar)
       }
    }
 }
