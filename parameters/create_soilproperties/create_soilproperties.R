@@ -4,6 +4,7 @@
 # Developed: 11/11/2016, A. Dugger
 # Updated: 07/23/2017, New functionality to create HYDRO2DTBL.nc, A. Dugger
 #          03/02/2020, Update MPTABLE.TBL read for new format in WRF-Hydro v5.2.x, A. Dugger
+#          10/01/2024, Updates for v5.3, A. Dugger
 ############################################################
 
 # Update relevant arguments below.
@@ -154,8 +155,13 @@ if (exists("mpParamFile") && !is.null(mpParamFile)) {
    rexpVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
    gparmLine <- grep("RSURF_SNOW", readLines(mpParamFile), value = TRUE)
    rsnowVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   # This param is new for v5.3 so set to 1.0 if not found for backward compatibility with v5.2
    gparmLine <- grep("SCAMAX", readLines(mpParamFile), value = TRUE)
-   scaVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   if (length(gparmLine)>0) { 
+     scaVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
+   } else {
+     scaVal <- 1.0
+   }
    gparmLine <- grep("SSI", readLines(mpParamFile), value = TRUE)
    ssiVal <- unlist(strsplit(gsub(" ", "", unlist(strsplit(gparmLine, "!"))[1]), "="))[2]
    gparmLine <- grep("SNOW_RET_FAC", readLines(mpParamFile), value = TRUE)
