@@ -1,11 +1,24 @@
 #!/bin/bash
+########################################################################################################
+# This script processes GLDAS data by:
+# 1. Merging 3-hourly NetCDF files for each day.
+# 2. Selecting key meteorological variables.
+# 3. Interpolating data to a 1-hour resolution.
+# 4. Splitting the interpolated data into separate time steps.
+# 5. Compressing the final NetCDF files for storage efficiency.
+# 
+# The script loops through a specified date range, handles errors to skip failed steps, 
+# and efficiently manages temporary files. Ensure `cdo` and `ncks` are installed before running.
 
+# Using with run_interp.sh
+# Create: Mar 2025, shihx2003
+########################################################################################################
 # Set the start and end dates
 start_date="2020-01-01"  # Modify this to your desired start date (YYYY-MM-DD)
 end_date="2020-12-31"    # Modify this to your desired end date (YYYY-MM-DD)
 
 # Specify the output directory where the files will be saved
-output_dir="/public/home/Shihuaixuan/Data/GLDAS2WRF-Hydro/2020"  # Modify this to your desired output directory
+output_dir="./2020"  # Modify this to your desired output directory
 mkdir -p $output_dir
 
 echo "###################################### All Start ##########################################"
