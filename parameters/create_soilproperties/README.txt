@@ -6,7 +6,8 @@ Purpose: create_soilproperties.R is an R script developed for the purpose of cre
 Authors: NCAR WRF-Hydro team
 
 Created: February 2018
-Updated: Oct 2020
+Updated: Oct 2020, Update MPTABLE.TBL read for new format in WRF-Hydro v5.2.x, A. Dugger
+       : Oct 2024, Updates for v5.3, A. Dugger
 
 Requirements: R, NCO, and the following R packages: ncdf4, stringr, plyr 
 
